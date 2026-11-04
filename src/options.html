@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>TubeLens settings</title>
+  <link rel="stylesheet" href="popup.css" />
+  <style>body { width: auto; max-width: 560px; margin: 24px auto; padding: 0 16px; }</style>
+</head>
+<body>
+  <h1>TubeLens settings</h1>
+  <p>Views, tags, publish date and the SEO score work without any setup. Likes, comments, engagement
+     and subscriber counts need a free <strong>YouTube Data API v3</strong> key.</p>
+  <ol class="note">
+    <li>Open Google Cloud Console → APIs &amp; Services → Library, and enable “YouTube Data API v3”.</li>
+    <li>Credentials → Create credentials → API key. Restricting it to the YouTube Data API is recommended.</li>
+    <li>Paste it below. It is stored only in this browser (chrome.storage.local).</li>
+  </ol>
+  <form id="form">
+    <label>API key <input id="key" type="password" autocomplete="off" spellcheck="false" /></label>
+    <div class="row"><button type="submit">Save</button><button type="button" id="clear">Remove key</button><span id="status" class="note"></span></div>
+  </form>
+  <script src="options.js"></script>
+</body>
+</html>

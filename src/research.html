@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>TubeLens research</title>
+  <link rel="stylesheet" href="research.css" />
+</head>
+<body>
+  <header class="top">
+    <h1>TubeLens research</h1>
+    <nav role="tablist">
+      <button role="tab" data-tab="channel" aria-selected="true">Channel report</button>
+      <button role="tab" data-tab="competitors" aria-selected="false">Competitors</button>
+      <button role="tab" data-tab="outliers" aria-selected="false">Outlier finder</button>
+    </nav>
+    <span id="quota" class="note"></span>
+  </header>
+
+  <p id="no-key" class="banner" hidden>These tools need a free YouTube Data API key. <a href="options.html">Add it in Settings</a>.</p>
+
+  <section id="channel" role="tabpanel">
+    <form id="channel-form" class="row">
+      <input id="channel-input" placeholder="Channel URL, @handle or UC… id" required aria-label="Channel" />
+      <select id="channel-count" aria-label="Videos to analyse">
+        <option value="25">25 videos</option><option value="50" selected>50 videos</option><option value="100">100 videos</option><option value="200">200 videos</option>
+      </select>
+      <button type="submit">Analyse</button>
+    </form>
+    <div id="channel-out"></div>
+  </section>
+
+  <section id="competitors" role="tabpanel" hidden>
+    <form id="comp-form" class="row">
+      <input id="comp-input" placeholder="Add a channel to track (URL, @handle or UC… id)" required aria-label="Channel to track" />
+      <button type="submit">Add</button>
+      <button type="button" id="comp-refresh">Refresh</button>
+    </form>
+    <p class="note">Tracked channels are saved in this browser. Each refresh uses about 3 quota units per channel.</p>
+    <div id="comp-out"></div>
+  </section>
+
+  <section id="outliers" role="tabpanel" hidden>
+    <form id="out-form" class="row wrap">
+      <input id="out-query" placeholder="Search topic, e.g. budget travel japan" required aria-label="Search topic" />
+      <select id="out-days" aria-label="Published within">
+        <option value="">Any time</option><option value="30">Last 30 days</option><option value="90">Last 90 days</option><option value="365" selected>Last year</option>
+      </select>
+      <select id="out-duration" aria-label="Duration">
+        <option value="any">Any length</option><option value="short">Under 4 min</option><option value="medium">4–20 min</option><option value="long">Over 20 min</option>
+      </select>
+      <select id="out-count" aria-label="Results">
+        <option value="25">25 results (100 units)</option><option value="50" selected>50 results (100 units)</option>
+      </select>
+      <button type="submit">Find outliers</button>
+    </form>
+    <p class="note">Outlier score = the video's views ÷ its channel's average views per video. 3× or more means the topic or packaging beat that channel's norm.</p>
+    <div id="out-out"></div>
+  </section>
+
+  <script src="../lib/seo.js"></script>
+  <script src="../lib/ytapi.js"></script>
+  <script src="../lib/research.js"></script>
+  <script src="research.js"></script>
+</body>
+</html>

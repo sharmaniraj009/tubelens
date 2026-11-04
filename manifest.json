@@ -1,0 +1,24 @@
+{
+  "manifest_version": 3,
+  "name": "TubeLens – YouTube SEO helper",
+  "version": "0.2.0",
+  "description": "YouTube stats, transparent SEO score, keyword ideas, channel research, outliers and a thumbnail maker. Runs locally.",
+  "permissions": ["storage", "unlimitedStorage", "clipboardWrite"],
+  "host_permissions": [
+    "https://www.youtube.com/*",
+    "https://i.ytimg.com/*",
+    "https://suggestqueries.google.com/*",
+    "https://www.googleapis.com/*"
+  ],
+  "background": { "service_worker": "src/background.js" },
+  "action": { "default_popup": "src/popup.html", "default_title": "TubeLens" },
+  "options_page": "src/options.html",
+  "content_scripts": [
+    {
+      "matches": ["https://www.youtube.com/*"],
+      "js": ["lib/seo.js", "lib/youtube.js", "src/content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "icons": { "48": "icons/icon48.png", "128": "icons/icon128.png" }
+}

@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>TubeLens</title>
+  <link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+  <header>
+    <strong>TubeLens</strong>
+    <nav role="tablist">
+      <button role="tab" data-tab="keywords" aria-selected="true">Keyword ideas</button>
+      <button role="tab" data-tab="checker" aria-selected="false">SEO checker</button>
+    </nav>
+  </header>
+
+  <section id="keywords" role="tabpanel">
+    <form id="kw-form" class="row">
+      <input id="seed" placeholder="Seed topic, e.g. home workout" required />
+      <button type="submit">Find</button>
+    </form>
+    <p id="kw-status" class="note">Ideas come from YouTube search autocomplete. "Hits" counts how many of 27 lookups suggested it — a popularity hint, not search volume.</p>
+    <ol id="kw-list"></ol>
+    <button id="kw-copy" hidden>Copy all</button>
+  </section>
+
+  <section id="checker" role="tabpanel" hidden>
+    <label>Target keyword <input id="c-keyword" placeholder="optional — defaults to first tag" /></label>
+    <label>Title <input id="c-title" /></label>
+    <label>Description <textarea id="c-desc" rows="5"></textarea></label>
+    <label>Tags (comma-separated) <textarea id="c-tags" rows="2"></textarea></label>
+    <div class="row"><span id="c-score" class="score">0</span><span>/ 100</span></div>
+    <ul id="c-checks"></ul>
+  </section>
+
+  <footer>
+    <a href="thumbnail.html" target="_blank">Thumbnail maker</a> ·
+    <a href="research.html" target="_blank">Channel research</a> ·
+    <a href="options.html" target="_blank">Settings</a>
+  </footer>
+  <script src="../lib/seo.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

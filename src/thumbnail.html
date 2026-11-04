@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Thumbnail Maker</title>
+  <link rel="stylesheet" href="thumbnail.css" />
+</head>
+<body>
+  <header class="topbar">
+    <h1>TubeLens <span>Thumbnail Maker</span></h1>
+    <div class="actions">
+      <button id="btn-new" type="button">New</button>
+      <label class="inline">Template
+        <select id="template-select" aria-label="Apply a starter template">
+          <option value="">Choose…</option>
+        </select>
+      </label>
+      <button id="btn-undo" type="button" title="Undo (Ctrl+Z)">Undo</button>
+      <button id="btn-redo" type="button" title="Redo (Ctrl+Shift+Z)">Redo</button>
+      <button id="btn-import" type="button">Open project</button>
+      <button id="btn-save-project" type="button">Save project</button>
+      <button id="btn-copy" type="button">Copy image</button>
+      <button id="btn-export" type="button" class="primary">Export PNG</button>
+      <input id="file-project" type="file" accept="application/json,.json" hidden />
+    </div>
+  </header>
+  <p id="status" class="status" role="status" aria-live="polite"></p>
+
+  <main class="layout">
+    <section class="stage" aria-label="Canvas">
+      <div class="canvas-wrap" id="canvas-wrap">
+        <canvas id="canvas" width="1280" height="720" tabindex="0" aria-label="Thumbnail canvas, 1280 by 720. Drag layers to move them; drag empty space to pan the background."></canvas>
+        <div class="drop-hint" id="drop-hint" hidden>Drop image: background if empty, otherwise a new image layer</div>
+      </div>
+      <div class="add-bar" role="toolbar" aria-label="Add layers">
+        <button id="add-text" type="button">+ Text</button>
+        <button id="add-image" type="button">+ Image layer</button>
+        <label class="inline">+ Shape
+          <select id="add-shape" aria-label="Add a shape">
+            <option value="">…</option>
+            <option value="rect">Rectangle</option>
+            <option value="circle">Circle</option>
+            <option value="ring">Ring (outline circle)</option>
+            <option value="arrow">Arrow</option>
+          </select>
+        </label>
+        <label class="inline">+ Effect
+          <select id="add-overlay" aria-label="Add an overlay effect">
+            <option value="">…</option>
+            <option value="vignette">Dark vignette</option>
+            <option value="gradient">Left-to-right gradient</option>
+            <option value="tint">Colour tint</option>
+          </select>
+        </label>
+        <span class="hint">Tip: paste (Ctrl+V) or drop an image. Arrows nudge, Delete removes, Ctrl+D duplicates.</span>
+        <input id="file-image" type="file" accept="image/*" hidden />
+        <input id="file-bg" type="file" accept="image/*" hidden />
+      </div>
+    </section>
+
+    <aside class="side">
+      <details open class="panel">
+        <summary>Background</summary>
+        <div class="row">
+          <button id="bg-upload" type="button">Choose image…</button>
+          <button id="bg-remove" type="button">Remove image</button>
+        </div>
+        <label>Colour <input id="bg-color" type="color" data-bg="color" /></label>
+        <label>Zoom <input type="range" min="1" max="3" step="0.01" data-bg="zoom" /></label>
+        <label>Pan X <input type="range" min="-640" max="640" step="1" data-bg="panX" /></label>
+        <label>Pan Y <input type="range" min="-360" max="360" step="1" data-bg="panY" /></label>
+        <label>Brightness <input type="range" min="30" max="180" step="1" data-bg="brightness" /></label>
+        <label>Contrast <input type="range" min="30" max="200" step="1" data-bg="contrast" /></label>
+        <label>Saturation <input type="range" min="0" max="250" step="1" data-bg="saturation" /></label>
+        <label>Blur <input type="range" min="0" max="20" step="0.5" data-bg="blur" /></label>
+      </details>
+
+      <details open class="panel">
+        <summary>Layers</summary>
+        <ol id="layer-list" class="layers" aria-label="Layers, top first"></ol>
+      </details>
+
+      <details open class="panel">
+        <summary>Properties</summary>
+        <div id="props"><p class="hint">Select a layer to edit it.</p></div>
+      </details>
+    </aside>
+  </main>
+
+  <section class="bottom">
+    <div class="panel previews-panel">
+      <div class="previews-head">
+        <h2>How it looks on YouTube</h2>
+        <label class="inline">Video title <input id="pv-title" placeholder="Your video title" /></label>
+        <label class="inline">Channel <input id="pv-channel" placeholder="Your channel" /></label>
+        <label class="inline"><input id="pv-dark" type="checkbox" /> Dark theme</label>
+      </div>
+      <div id="previews" class="previews light">
+        <figure class="pv pv-home"><figcaption>Home feed</figcaption>
+          <div class="card col"><canvas data-w="360" data-h="202"></canvas>
+            <div class="meta"><div class="avatar"></div><div><div class="t"></div><div class="c"></div></div></div></div>
+        </figure>
+        <figure class="pv pv-search"><figcaption>Search results</figcaption>
+          <div class="card row"><canvas data-w="360" data-h="202"></canvas>
+            <div class="meta"><div><div class="t"></div><div class="c"></div></div></div></div>
+        </figure>
+        <figure class="pv pv-side"><figcaption>Up next (smallest)</figcaption>
+          <div class="card row"><canvas data-w="168" data-h="94"></canvas>
+            <div class="meta"><div><div class="t"></div><div class="c"></div></div></div></div>
+        </figure>
+        <figure class="pv pv-mobile"><figcaption>Mobile</figcaption>
+          <div class="card col"><canvas data-w="400" data-h="225"></canvas>
+            <div class="meta"><div class="avatar"></div><div><div class="t"></div><div class="c"></div></div></div></div>
+        </figure>
+      </div>
+    </div>
+    <div class="panel checks-panel">
+      <h2>Checks</h2>
+      <ul id="checks" class="checks"></ul>
+    </div>
+  </section>
+
+  <script src="../lib/thumbnail-checks.js"></script>
+  <script src="thumbnail.js"></script>
+</body>
+</html>
