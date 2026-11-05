@@ -1,0 +1,89 @@
+# Tests every push and pull request. On main, a version with no GitHub release yet is packaged,
+# uploaded to the Chrome Web Store, submitted for review, then released on GitHub.
+# Publishing needs the CWS_* secrets described in store/README.md; without them the
+# packaged zip is still attached to each run as an artifact.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      cancel_pending_review:
+        description: Cancel a submission still in review, then upload this version
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - name: Package the extension
+        run: npm run package
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tubelens-extension
+          path: dist/tubelens-extension-*.zip
+          if-no-files-found: error
+
+  release:
+    needs: test
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    concurrency:
+      group: chrome-web-store
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Check whether this version is new
+        id: version
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version=$(node -p "require('./manifest.json').version")
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          if gh release view "v$version" >/dev/null 2>&1; then
+            echo "new=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::v$version is already released. To ship an update, run 'npm version patch' and push with --follow-tags."
+          else
+            echo "new=true" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Package the extension
+        if: steps.version.outputs.new == 'true'
+        run: npm run package
+      - name: Upload to the Chrome Web Store and submit for review
+        if: steps.version.outputs.new == 'true'
+        id: store
+        env:
+          CWS_PUBLISHER_ID: ${{ secrets.CWS_PUBLISHER_ID }}
+          CWS_EXTENSION_ID: ${{ secrets.CWS_EXTENSION_ID }}
+          CWS_SERVICE_ACCOUNT_KEY: ${{ secrets.CWS_SERVICE_ACCOUNT_KEY }}
+          CWS_CLIENT_ID: ${{ secrets.CWS_CLIENT_ID }}
+          CWS_CLIENT_SECRET: ${{ secrets.CWS_CLIENT_SECRET }}
+          CWS_REFRESH_TOKEN: ${{ secrets.CWS_REFRESH_TOKEN }}
+          CWS_CANCEL_PENDING: ${{ inputs.cancel_pending_review && 'true' || 'false' }}
+        run: node scripts/cws-publish.mjs "dist/tubelens-extension-${{ steps.version.outputs.version }}.zip"
+      - name: Tag and create the GitHub release
+        if: steps.version.outputs.new == 'true' && (steps.store.outputs.result == 'submitted' || steps.store.outputs.result == 'in-store')
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          gh release create "v$VERSION" "dist/tubelens-extension-$VERSION.zip" \
+            --target "$GITHUB_SHA" --title "TubeLens v$VERSION" --generate-notes

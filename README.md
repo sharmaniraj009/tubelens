@@ -91,11 +91,24 @@ searches/day). The extension stores the key only in `chrome.storage.local`.
 `chrome://extensions` → Developer mode → **Load unpacked** → this folder. Add the API key in
 the extension's Settings.
 
+## Release
+Every push and pull request runs the tests and packages the extension
+(`.github/workflows/ci.yml`). On `main`, a version that has no GitHub release yet is uploaded
+to the Chrome Web Store, submitted for review, and released on GitHub with the zip.
+```
+npm version patch          # bumps package.json, package-lock.json and manifest.json, commits and tags
+git push --follow-tags
+```
+First-time store setup, listing copy, privacy answers and the CI secrets are covered in
+[store/README.md](store/README.md). The privacy policy is in [PRIVACY.md](PRIVACY.md).
+
 ## Develop
 ```
 npm install
 npm test            # unit tests (scoring, parsing, Data API client, research, clips, thumbnail checks)
 npm run test:live   # MCP smoke test against live YouTube
+npm run package     # dist/tubelens-extension-<version>.zip for the Chrome Web Store
 ```
 Layout: `lib/` shared logic (used by the extension and the MCP server), `src/` extension
-pages and scripts, `mcp/` server, `test/` tests.
+pages and scripts, `mcp/` server, `scripts/` packaging and publishing, `store/` Chrome Web
+Store listing and assets, `test/` tests.

@@ -1,14 +1,14 @@
 {
   "manifest_version": 3,
-  "name": "TubeLens – YouTube SEO helper",
+  "name": "TubeLens – Creator SEO, Clips & Thumbnails",
   "version": "0.3.0",
-  "description": "YouTube stats, SEO score, clip finder (most replayed moments), keyword ideas, channel research and a thumbnail maker. Runs locally.",
+  "description": "SEO score, video stats, a clip finder for the most replayed moments, keyword ideas and a thumbnail maker for YouTube creators.",
   "permissions": ["storage", "unlimitedStorage", "clipboardWrite"],
   "host_permissions": [
     "https://www.youtube.com/*",
     "https://i.ytimg.com/*",
     "https://suggestqueries.google.com/*",
-    "https://www.googleapis.com/*"
+    "https://www.googleapis.com/youtube/*"
   ],
   "background": { "service_worker": "src/background.js" },
   "action": { "default_popup": "src/popup.html", "default_title": "TubeLens" },
