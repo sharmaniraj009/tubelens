@@ -8,24 +8,38 @@
 <body>
   <header>
     <strong>TubeLens</strong>
-    <nav role="tablist">
-      <button role="tab" data-tab="keywords" aria-selected="true">Keyword ideas</button>
-      <button role="tab" data-tab="checker" aria-selected="false">SEO checker</button>
-    </nav>
+    <a id="key-status" class="pill" href="options.html" target="_blank"></a>
   </header>
+
+  <nav class="tools" aria-label="Tools">
+    <a class="tool" href="research.html" target="_blank"><b>Channel research</b><span>Reports, competitors, outliers</span></a>
+    <a class="tool" href="thumbnail.html" target="_blank"><b>Thumbnail maker</b><span>1280×720 editor</span></a>
+  </nav>
+
+  <p id="key-banner" class="banner" hidden>
+    Add a free YouTube API key to see likes and subscribers and to use Channel research.
+    <a href="options.html" target="_blank">Set it up (2 minutes)</a>
+  </p>
+
+  <nav class="tabs" role="tablist">
+    <button role="tab" data-tab="keywords" aria-selected="true">Keyword ideas</button>
+    <button role="tab" data-tab="checker" aria-selected="false">SEO checker</button>
+    <button role="tab" data-tab="clips" aria-selected="false">My clips <span id="clips-count" class="count"></span></button>
+  </nav>
 
   <section id="keywords" role="tabpanel">
     <form id="kw-form" class="row">
-      <input id="seed" placeholder="Seed topic, e.g. home workout" required />
-      <button type="submit">Find</button>
+      <input id="seed" placeholder="Seed topic, e.g. home workout" required aria-label="Seed topic" />
+      <button type="submit" class="primary">Find</button>
     </form>
-    <p id="kw-status" class="note">Ideas come from YouTube search autocomplete. "Hits" counts how many of 27 lookups suggested it — a popularity hint, not search volume.</p>
+    <p id="kw-status" class="note">Ideas come from YouTube search autocomplete. "Hits" counts how many of 27 lookups suggested a phrase: a popularity hint, not search volume.</p>
     <ol id="kw-list"></ol>
     <button id="kw-copy" hidden>Copy all</button>
   </section>
 
   <section id="checker" role="tabpanel" hidden>
-    <label>Target keyword <input id="c-keyword" placeholder="optional — defaults to first tag" /></label>
+    <p class="note">Paste your draft before you upload. It's saved as you type.</p>
+    <label>Target keyword <input id="c-keyword" placeholder="optional; defaults to the first tag" /></label>
     <label>Title <input id="c-title" /></label>
     <label>Description <textarea id="c-desc" rows="5"></textarea></label>
     <label>Tags (comma-separated) <textarea id="c-tags" rows="2"></textarea></label>
@@ -33,12 +47,26 @@
     <ul id="c-checks"></ul>
   </section>
 
-  <footer>
-    <a href="thumbnail.html" target="_blank">Thumbnail maker</a> ·
-    <a href="research.html" target="_blank">Channel research</a> ·
-    <a href="options.html" target="_blank">Settings</a>
-  </footer>
+  <section id="clips" role="tabpanel" hidden>
+    <div id="clips-empty" class="empty" hidden>
+      <p><b>No clips yet.</b></p>
+      <ol class="steps">
+        <li>Open any YouTube video.</li>
+        <li>In the TubeLens panel next to it, open <b>Clips</b>.</li>
+        <li>Save a suggested moment, or set a start and end (<kbd>Alt+[</kbd> and <kbd>Alt+]</kbd>).</li>
+      </ol>
+    </div>
+    <div id="clips-list"></div>
+    <div id="clips-actions" class="row" hidden>
+      <button id="clips-copy">Copy all with links</button>
+      <button id="clips-csv">Download CSV</button>
+      <span id="clips-status" class="note" role="status"></span>
+    </div>
+  </section>
+
+  <footer><a href="options.html" target="_blank">Settings and help</a></footer>
   <script src="../lib/seo.js"></script>
+  <script src="../lib/clips.js"></script>
   <script src="popup.js"></script>
 </body>
 </html>

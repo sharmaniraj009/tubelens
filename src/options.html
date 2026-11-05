@@ -2,23 +2,72 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>TubeLens settings</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>TubeLens: getting started</title>
   <link rel="stylesheet" href="popup.css" />
-  <style>body { width: auto; max-width: 560px; margin: 24px auto; padding: 0 16px; }</style>
+  <style>
+    body { width: auto; max-width: 640px; margin: 32px auto; padding: 0 16px; font-size: 14px; }
+    h1 { font-size: 22px; margin: 0 0 4px; } h2 { font-size: 16px; margin: 28px 0 8px; }
+    .lead { color: var(--muted); margin: 0 0 16px; }
+    .features { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; list-style: none; padding: 0; }
+    .features li { display: block; border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+    .features b { display: block; margin-bottom: 2px; }
+    .steps { list-style: decimal; padding-left: 22px; max-height: none; }
+    .steps li { margin: 6px 0; }
+    form { margin-top: 12px; }
+    #status { font-size: 13px; }
+    #status.ok { color: var(--good); } #status.bad { color: var(--bad); }
+    table { border-collapse: collapse; width: 100%; } td { padding: 4px 8px 4px 0; vertical-align: top; }
+    @media (max-width: 520px) { .features { grid-template-columns: 1fr; } }
+  </style>
 </head>
 <body>
-  <h1>TubeLens settings</h1>
-  <p>Views, tags, publish date and the SEO score work without any setup. Likes, comments, engagement
-     and subscriber counts need a free <strong>YouTube Data API v3</strong> key.</p>
-  <ol class="note">
-    <li>Open Google Cloud Console → APIs &amp; Services → Library, and enable “YouTube Data API v3”.</li>
-    <li>Credentials → Create credentials → API key. Restricting it to the YouTube Data API is recommended.</li>
-    <li>Paste it below. It is stored only in this browser (chrome.storage.local).</li>
+  <h1>Welcome to TubeLens</h1>
+  <p class="lead">YouTube growth tools that run in your browser. Most of them work right away, with no setup.</p>
+
+  <ul class="features">
+    <li><b>Video panel</b>A panel next to every video with views, views per hour, tags and a 100-point SEO check.</li>
+    <li><b>Clips</b>See which moments viewers replay most, then mark, save and share clips for Shorts or highlights.</li>
+    <li><b>Toolbar popup</b>Keyword ideas, an SEO checker for drafts, and all your saved clips. Click the TubeLens icon to open it.</li>
+    <li><b>Thumbnail maker</b>Start a thumbnail from any video frame and preview it at YouTube's sizes.</li>
+  </ul>
+  <p><a href="https://www.youtube.com/" target="_blank" rel="noopener">Open YouTube</a> and play any video to try it.
+     Tip: pin TubeLens from the puzzle-piece menu so the popup is one click away.</p>
+
+  <h2>Optional: a free YouTube API key</h2>
+  <p>The key adds likes, comments, engagement and subscriber counts to the panel, and turns on
+     <a href="research.html">Channel research</a> (channel reports, competitor tracking and the outlier finder). It takes about 2 minutes:</p>
+  <ol class="steps">
+    <li><a href="https://console.cloud.google.com/apis/library/youtube.googleapis.com" target="_blank" rel="noopener">Open YouTube Data API v3</a>
+        in Google Cloud and click <b>Enable</b>. Create a project first if it asks you to.</li>
+    <li><a href="https://console.cloud.google.com/apis/credentials" target="_blank" rel="noopener">Open Credentials</a>,
+        click <b>Create credentials → API key</b>, then copy the key.</li>
+    <li>Paste it below and click <b>Save and test</b>.</li>
   </ol>
   <form id="form">
-    <label>API key <input id="key" type="password" autocomplete="off" spellcheck="false" /></label>
-    <div class="row"><button type="submit">Save</button><button type="button" id="clear">Remove key</button><span id="status" class="note"></span></div>
+    <label>API key <input id="key" type="password" autocomplete="off" spellcheck="false" placeholder="AIza…" /></label>
+    <div class="row">
+      <button type="submit" class="primary">Save and test</button>
+      <button type="button" id="clear">Remove key</button>
+      <span id="status" role="status"></span>
+    </div>
   </form>
+  <p class="note">The key is stored only in this browser and is sent only to Google. The free quota is 10,000 units a day:
+     the panel uses about 2 per video, a channel report about 3, and each search 100.</p>
+
+  <h2>Clip shortcuts</h2>
+  <p>Use these on any video page, then open the <b>Clips</b> tab in the panel to see your clips.</p>
+  <table>
+    <tr><td><kbd>Alt+[</kbd></td><td>Set the clip start to the current time</td></tr>
+    <tr><td><kbd>Alt+]</kbd></td><td>Set the clip end to the current time</td></tr>
+    <tr><td><kbd>Alt+S</kbd></td><td>Save the clip</td></tr>
+  </table>
+  <p class="note">TubeLens doesn't download or cut videos. Use the saved times in your editor, or use YouTube's
+     “Edit into a Short” on your own videos.</p>
+
+  <h2>Your data</h2>
+  <p class="note">Clips, tracked competitors, drafts and settings stay in this browser's extension storage.
+     TubeLens has no server and collects nothing.</p>
   <script src="options.js"></script>
 </body>
 </html>

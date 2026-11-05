@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "TubeLens – YouTube SEO helper",
-  "version": "0.2.0",
-  "description": "YouTube stats, transparent SEO score, keyword ideas, channel research, outliers and a thumbnail maker. Runs locally.",
+  "version": "0.3.0",
+  "description": "YouTube stats, SEO score, clip finder (most replayed moments), keyword ideas, channel research and a thumbnail maker. Runs locally.",
   "permissions": ["storage", "unlimitedStorage", "clipboardWrite"],
   "host_permissions": [
     "https://www.youtube.com/*",
@@ -16,7 +16,7 @@
   "content_scripts": [
     {
       "matches": ["https://www.youtube.com/*"],
-      "js": ["lib/seo.js", "lib/youtube.js", "src/content.js"],
+      "js": ["lib/seo.js", "lib/youtube.js", "lib/clips.js", "src/content.js"],
       "run_at": "document_idle"
     }
   ],

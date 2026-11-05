@@ -12,6 +12,7 @@ await call("score_metadata", { title: "Home Workout for Beginners (No Equipment)
 await call("keyword_ideas", { seed: "thumbnail design", limit: 5 });
 await call("search_videos", { query: "home workout" });
 await call("get_videos", { videos: ["not a video"] });
+await call("find_clips", { video: "https://www.youtube.com/watch?v=dQw4w9WgXcQ", count: 3 });
 const p = await client.getPrompt({ name: "write_titles", arguments: { topic: "budget travel in Japan" } });
 console.log("\n# prompt write_titles:", p.messages[0].content.text.slice(0, 160));
 await client.close();

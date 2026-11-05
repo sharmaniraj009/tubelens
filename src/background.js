@@ -3,7 +3,12 @@
 importScripts("../lib/keywords.js", "../lib/ytapi.js");
 
 const { keywordIdeas } = globalThis.TubeLensKeywords;
-const { createClient } = globalThis.TubeLensApi;
+const { createClient, YouTubeApiError } = globalThis.TubeLensApi;
+
+// First install: open the getting-started page.
+chrome.runtime.onInstalled.addListener(({ reason }) => {
+  if (reason === "install") chrome.runtime.openOptionsPage();
+});
 
 async function apiClient() {
   const { apiKey } = await chrome.storage.local.get("apiKey");
@@ -40,11 +45,27 @@ async function openResearch({ channel }) {
   return { opened: true };
 }
 
+// Check a key with the cheapest Data API call (1 unit) before saving it.
+async function testKey({ key }) {
+  try {
+    await createClient({ key: String(key ?? "") }).videoCategories("US");
+    return { valid: true };
+  } catch (err) {
+    if (err instanceof YouTubeApiError) return { valid: false, code: err.code, message: err.message };
+    return { valid: false, code: "network", message: String(err?.message ?? err) };
+  }
+}
+
 const handlers = {
   keywordIdeas: ({ seed }) => keywordIdeas(String(seed ?? "")),
   dataApiStats,
   openThumbnail,
   openResearch,
+  openOptions: async () => {
+    await chrome.runtime.openOptionsPage();
+    return { opened: true };
+  },
+  testKey,
 };
 
 chrome.runtime.onMessage.addListener((msg, sender, reply) => {

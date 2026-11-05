@@ -4,9 +4,19 @@ A YouTube growth toolkit: a Chrome extension plus an MCP server for Claude. Ever
 your machine — there is no TubeLens backend.
 
 ## Extension features
-- **Video panel** on every watch/Shorts page: views, views/hour, publish date, length, category,
-  tags (*Copy tags*), a 100-point SEO score with per-check reasons, and buttons for
-  *Thumbnail from this frame*, *Edit current thumbnail* and *Channel report*.
+A **Getting started** page opens on install. It explains what works with no setup and walks
+through adding the optional API key, with a *Save and test* button.
+- **Video panel** on every watch/Shorts page, with four tabs:
+  - *Overview*: views, views/hour, publish date, length, category, likes, comments,
+    engagement and subscribers, plus buttons for *Thumbnail from this frame*, *Edit thumbnail*,
+    *Find clips* and *Channel report*.
+  - *SEO*: a 100-point score with the failed checks listed first.
+  - *Tags*: the video's tags, with *Copy tags*.
+  - *Clips*: YouTube's "Most replayed" curve as a clickable timeline, up to 5 suggested clips
+    around its peaks (the opening spike is skipped), and start/end marking with buttons or
+    `Alt+[` / `Alt+]` / `Alt+S`. Saved clips can be previewed (playback stops at the end),
+    copied as links or as a chapter block, and deleted with undo. TubeLens doesn't download or
+    cut video.
 - **Thumbnail maker** (`src/thumbnail.html`): 1280×720 editor with background controls, text,
   image, shape and effect layers, templates, undo/redo, YouTube-size previews (home, search,
   up-next, mobile; light/dark), legibility/contrast/duration-badge checks, and export under
@@ -16,7 +26,9 @@ your machine — there is no TubeLens backend.
     long-form, outliers, underperformers and an SEO audit of recent uploads.
   - *Competitors* — track channels and compare them side by side.
   - *Outlier finder* — search a topic and rank videos by how far they beat their channel's average.
-- **Popup** — keyword ideas from YouTube autocomplete, and a pre-upload SEO checker.
+- **Popup**: shortcuts to Channel research and the Thumbnail maker, a reminder when no API key
+  is set, keyword ideas from YouTube autocomplete, a pre-upload SEO checker, and **My clips**,
+  which lists saved clips from every video and can copy them all or download them as CSV.
 
 ## MCP server (Claude Code / Claude Desktop)
 | Tool | What it does | Quota |
@@ -34,13 +46,15 @@ your machine — there is no TubeLens backend.
 | `similar_channels` | Channels covering the same topics | ~100 per topic |
 | `video_comments` | Comments with a digest of top comments and questions | 1 per 100 |
 | `video_history` | Growth and title/thumbnail changes from local snapshots | 1 |
+| `find_clips` | Clip-worthy moments from "Most replayed", chapters and comment timestamps | 0 (1 with comments) |
 | `library` | Saved competitors and bookmarks (`~/.tubelens`) | 0–1 |
 | `keyword_ideas` | Autocomplete keyword expansion | none, no key |
 | `score_metadata` | SEO checklist for drafts | none, no key |
 
 Prompts (Claude writes; the tools ground and score it): `write_titles`, `write_description`,
 `write_script`, `title_review`, `video_chapters`, `video_ideas`, `comment_insights` (with reply
-drafts), `channel_audit`.
+drafts), `channel_audit`, `clip_shorts` (Shorts from a long video: timestamps, hook, title and
+caption).
 
 `video_history` only knows what TubeLens has observed since you started using it; YouTube
 doesn't expose past snapshots. Set `TUBELENS_HOME` to store data somewhere other than `~/.tubelens`.
@@ -67,6 +81,9 @@ searches/day). The extension stores the key only in `chrome.storage.local`.
 - Keyword "appearances" are an autocomplete popularity hint, not search volume; no free source
   provides search volume.
 - Outlier ratios use channel averages from public counts, so they are approximate.
+- "Most replayed" data appears only once a video has enough views, and its intensities are
+  relative to that video's hottest moment. Clip suggestions are starting points to trim, not
+  edits.
 - Transcripts: YouTube now blocks unauthenticated caption downloads, so the writing prompts
   take a transcript or notes that you supply.
 
@@ -77,7 +94,7 @@ the extension's Settings.
 ## Develop
 ```
 npm install
-npm test            # unit tests (scoring, parsing, Data API client, research, thumbnail checks)
+npm test            # unit tests (scoring, parsing, Data API client, research, clips, thumbnail checks)
 npm run test:live   # MCP smoke test against live YouTube
 ```
 Layout: `lib/` shared logic (used by the extension and the MCP server), `src/` extension

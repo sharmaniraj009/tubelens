@@ -13,9 +13,12 @@ const yt = require("../lib/youtube.js");
 const { keywordIdeas } = require("../lib/keywords.js");
 const { createClient, YouTubeApiError } = require("../lib/ytapi.js");
 const research = require("../lib/research.js");
+const clips = require("../lib/clips.js");
 const pkg = require("../package.json");
 
 const WATCH_TIMEOUT_MS = 15000;
+// TUBELENS_YOUTUBE_WEB_BASE points public-page reads at a test double; production uses YouTube.
+const WEB_BASE = (process.env.TUBELENS_YOUTUBE_WEB_BASE || "https://www.youtube.com").replace(/\/+$/, "");
 const BROWSER_HEADERS = {
   "user-agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0 Safari/537.36",
   "accept-language": "en-US,en;q=0.9",
@@ -56,15 +59,21 @@ function videoIdFrom(input) {
   return id;
 }
 
-async function fetchWatchPage(videoId) {
-  const res = await fetch(`https://www.youtube.com/watch?v=${encodeURIComponent(videoId)}`, {
+async function fetchWatchHtml(videoId) {
+  const res = await fetch(`${WEB_BASE}/watch?v=${encodeURIComponent(videoId)}`, {
     headers: BROWSER_HEADERS, signal: AbortSignal.timeout(WATCH_TIMEOUT_MS),
   });
   if (!res.ok) throw new UserError(`YouTube returned HTTP ${res.status} for video ${videoId}`);
-  const video = yt.parseWatchPage(await res.text());
+  return res.text();
+}
+
+function parseWatchOrThrow(html, videoId) {
+  const video = yt.parseWatchPage(html);
   if (!video) throw new UserError(`Couldn't read video ${videoId}: it may be private, removed, age-restricted, or behind a consent page.`);
   return video;
 }
+
+const fetchWatchPage = async (videoId) => parseWatchOrThrow(await fetchWatchHtml(videoId), videoId);
 
 const scoreSummary = (r) => ({
   score: r.score,
@@ -298,6 +307,81 @@ server.registerTool("video_comments", {
   return {
     digest: research.commentDigest(comments),
     comments: digest_only ? undefined : comments.map((c) => ({ ...c, text: c.text.slice(0, 1000), publishedAt: c.publishedAt?.slice(0, 10) })),
+  };
+}));
+
+server.registerTool("find_clips", {
+  title: "Find clip moments",
+  description: "Suggest clip-worthy moments in a video (for Shorts, highlights or sharing) from YouTube's 'Most replayed' heatmap, the video's chapters and, with YOUTUBE_API_KEY, timestamps viewers mention in comments (1 unit). Returns start/end times, replay intensity, chapter, and share/embed links. The heatmap needs no key, but YouTube only shows it on videos with enough views. TubeLens does not download or cut video.",
+  inputSchema: {
+    video: z.string().describe("Video URL or 11-character id"),
+    count: z.number().int().min(1).max(10).default(5).describe("How many clips to suggest"),
+    min_seconds: z.number().int().min(5).max(180).default(15),
+    max_seconds: z.number().int().min(10).max(180).default(60).describe("Longest clip; Shorts allow up to 180 s, 15–60 s is typical"),
+    use_comments: z.boolean().default(true).describe("Also scan the top 100 comments for timestamps (needs YOUTUBE_API_KEY, 1 unit)"),
+  },
+  annotations: { ...readOnly, title: "Find clips" },
+}, ({ video, count, min_seconds, max_seconds, use_comments }) => run(async () => {
+  if (min_seconds > max_seconds) throw new UserError("min_seconds can't be larger than max_seconds.");
+  const id = videoIdFrom(video);
+  const html = await fetchWatchHtml(id);
+  const meta = parseWatchOrThrow(html, id);
+  const duration = meta.lengthSeconds;
+  if (!duration) throw new UserError("This video has no fixed length (live stream?), so clips can't be suggested.");
+  const heatmap = clips.heatmapFromInitialData(yt.extractJsonAfter(html, "ytInitialData"), id);
+  const chapters = clips.chapterList(meta.description);
+  const notes = [];
+
+  let mentions = [];
+  if (use_comments && hasKey()) {
+    try {
+      mentions = clips.timestampMentions(await api().commentThreads({ videoId: id, max: 100 }), { durationSeconds: duration });
+    } catch (err) {
+      if (!(err instanceof YouTubeApiError) || err.code !== "not_found") throw err;
+      notes.push(err.message);
+    }
+  } else if (use_comments) {
+    notes.push("Set YOUTUBE_API_KEY to also use timestamps viewers mention in comments.");
+  }
+
+  const limits = { durationSeconds: duration, minSeconds: min_seconds, maxSeconds: max_seconds };
+  const picked = clips.suggestClips(heatmap, { ...limits, count }).map((c) => ({ ...c, source: "most_replayed" }));
+  // Comment moments that no heatmap clip covers become clips of their own. With a heatmap,
+  // a moment needs 2+ mentions to count; without one, any mention is the best signal there is.
+  for (const m of mentions) {
+    if (picked.length >= count) break;
+    if (m.mentions < 2 && heatmap.length) continue;
+    const range = clips.clipAround(m.at, limits);
+    if (picked.some((c) => c.start < range.end && range.start < c.end)) continue;
+    picked.push({ ...range, length: range.end - range.start, peak: m.at, intensity: null, source: "comments" });
+  }
+
+  if (!heatmap.length) notes.push("YouTube shows no 'Most replayed' data for this video (it appears once a video has enough views).");
+  else notes.push("replayIntensity is relative to this video's most replayed segment (100). The opening seconds are skipped: almost every heatmap starts high because playback starts there.");
+  if (!picked.length) notes.push("No clip moments found. Ask the creator for a transcript or the moments they have in mind.");
+  notes.push("Clips are suggestions. Cut them in an editor, or with YouTube's 'Edit into a Short' on your own videos.");
+
+  return {
+    video: { videoId: id, title: meta.title, channel: meta.channelName, durationSeconds: duration, url: `https://www.youtube.com/watch?v=${id}` },
+    heatmap: heatmap.length
+      ? { available: true, segments: heatmap.length, segmentSeconds: Number(heatmap[0].duration.toFixed(2)), sparkline: clips.sparkline(heatmap, 50) }
+      : { available: false },
+    clips: picked.map((c, i) => {
+      const inClip = mentions.filter((m) => m.at >= c.start && m.at <= c.end);
+      return {
+        rank: i + 1, source: c.source,
+        start: c.start, end: c.end, startTimestamp: clips.formatTime(c.start), endTimestamp: clips.formatTime(c.end), lengthSeconds: c.length,
+        peakTimestamp: clips.formatTime(c.peak), replayIntensity: c.intensity,
+        commentMentions: inClip.reduce((n, m) => n + m.mentions, 0) || undefined,
+        chapter: clips.chapterAt(chapters, c.peak)?.title,
+        url: clips.shareUrl(id, c.start), embedUrl: clips.embedUrl(id, c.start, c.end),
+      };
+    }),
+    commentMoments: mentions.length
+      ? mentions.slice(0, 8).map((m) => ({ timestamp: clips.formatTime(m.at), mentions: m.mentions, likes: m.likes, samples: m.samples }))
+      : undefined,
+    chapters: chapters.length ? chapters.map((c) => ({ timestamp: clips.formatTime(c.start), title: c.title })) : undefined,
+    notes,
   };
 }));
 
@@ -557,6 +641,22 @@ server.registerPrompt("video_chapters", {
 Output just the chapter block, then check it with score_metadata (put the block in the description) to confirm the chapters check passes.
 
 ${transcript}` } }],
+}));
+
+server.registerPrompt("clip_shorts", {
+  title: "Find Shorts in a video",
+  description: "Find the most clip-worthy moments in a long video and package each as a Short: timestamps, hook, title and caption.",
+  argsSchema: {
+    video: z.string().describe("Video URL or id (ideally your own)"),
+    count: z.string().optional().describe("How many Shorts, default 5"),
+    transcript: z.string().optional().describe("Timestamped transcript, to name moments and check each clip stands alone"),
+  },
+}, ({ video, count, transcript }) => ({
+  messages: [{ role: "user", content: { type: "text", text:
+`Find ${count || 5} Shorts in ${video}.
+1. Call find_clips for the video with count=${count || 5}. If it returns no clips, ask me for a transcript or the moments I have in mind; don't guess timestamps.
+${transcript ? `2. Use this transcript to name each moment, tighten its start/end to whole sentences, and drop clips that don't make sense on their own:\n${transcript}\n` : "2. Without a transcript you can't see what is said in each clip: say so, and phrase hooks and titles as suggestions for me to check against the footage.\n"}3. For each clip give: start–end with its link, why it should work (replay intensity, comment mentions, chapter), a suggested trim so the hook lands in the first 2 seconds, on-screen hook text (≤ 6 words), a Short title (≤ 60 characters, scored with score_metadata), and a caption with 2–3 hashtags.
+Rank them by expected performance. Remind me to cut the clips in an editor or with YouTube's "Edit into a Short", and only from videos I own or have rights to.` } }],
 }));
 
 server.registerPrompt("title_review", {

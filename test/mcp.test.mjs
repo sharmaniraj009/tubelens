@@ -40,6 +40,21 @@ function channelItem(id) {
     contentDetails: { relatedPlaylists: { uploads: `UU${id.slice(2)}` } } };
 }
 
+// Watch pages for find_clips: one with a "Most replayed" heatmap and chapters, one without.
+function heatmapMarkers() {
+  const level = (i) => (i < 5 ? 1 - i * 0.18 : i === 50 ? 0.9 : Math.abs(i - 50) === 1 ? 0.7 : Math.abs(i - 50) === 2 ? 0.5 : i === 20 ? 0.6 : 0.15);
+  return Array.from({ length: 100 }, (_, i) => ({ startMillis: String(i * 6000), durationMillis: "6000", intensityScoreNormalized: level(i) }));
+}
+function watchPage(id) {
+  const player = { videoDetails: { videoId: id, title: "Sourdough masterclass", shortDescription: "0:00 Intro\n2:00 Shaping\n5:00 The bake",
+    keywords: ["sourdough"], viewCount: "50000", lengthSeconds: "600", channelId: CH.A, author: "Home Baker" } };
+  const data = id === "clipvideo01"
+    ? { frameworkUpdates: { entityBatchUpdate: { mutations: [{ payload: { macroMarkersListEntity: { externalVideoId: id,
+        markersList: { markerType: "MARKER_TYPE_HEATMAP", markers: heatmapMarkers() } } } }] } } }
+    : { contents: {} };
+  return `<html><script>var ytInitialPlayerResponse = ${JSON.stringify(player)};</script><script>var ytInitialData = ${JSON.stringify(data)};</script></html>`;
+}
+
 function handle(url) {
   const p = url.searchParams;
   const resource = url.pathname.split("/").pop();
@@ -69,6 +84,10 @@ function handle(url) {
   }
   if (resource === "videoCategories") return [200, { items: [{ id: "26", snippet: { title: "Howto & Style", assignable: true } }, { id: "18", snippet: { title: "Short Movies", assignable: false } }] }];
   if (resource === "commentThreads") {
+    if (p.get("videoId") === "clipvideo01") {
+      const c = (id, text, likes) => ({ id, snippet: { totalReplyCount: 0, topLevelComment: { snippet: { authorDisplayName: "V", textDisplay: text, likeCount: likes, publishedAt: iso(1) } } } });
+      return [200, { items: [c("t1", "5:10 is the best part", 30), c("t2", "the bit at 5:12 haha", 10), c("t3", "8:20 and 8:25 saved me", 5), c("t4", "8:21 yes", 2)] }];
+    }
     if (p.get("videoId") === "vid00000005") return [403, { error: { message: "The video identified by the videoId parameter has disabled comments.", errors: [{ reason: "commentsDisabled" }] } }];
     return [200, { items: [
       { id: "c1", snippet: { totalReplyCount: 1, topLevelComment: { snippet: { authorDisplayName: "Ann", textDisplay: "How long should I proof the dough?", likeCount: 40, publishedAt: iso(3) } } }, replies: { comments: [{ snippet: { authorDisplayName: "Home Baker", textDisplay: "About 4 hours", likeCount: 5 } }] } },
@@ -87,7 +106,9 @@ const call = async (name, args) => {
 
 test.before(async () => {
   http = createServer((req, res) => {
-    const [status, body] = handle(new URL(req.url, "http://x"));
+    const url = new URL(req.url, "http://x");
+    if (url.pathname === "/watch") return res.writeHead(200, { "content-type": "text/html" }).end(watchPage(url.searchParams.get("v")));
+    const [status, body] = handle(url);
     res.writeHead(status, { "content-type": "application/json" }).end(JSON.stringify(body));
   });
   await new Promise((r) => http.listen(0, "127.0.0.1", r));
@@ -96,7 +117,8 @@ test.before(async () => {
   await client.connect(new StdioClientTransport({
     command: process.execPath, args: [new URL("../mcp/server.mjs", import.meta.url).pathname],
     env: { PATH: process.env.PATH, YOUTUBE_API_KEY: "test-key", TUBELENS_HOME: home,
-      TUBELENS_YOUTUBE_API_BASE: `http://127.0.0.1:${http.address().port}/youtube/v3/` },
+      TUBELENS_YOUTUBE_API_BASE: `http://127.0.0.1:${http.address().port}/youtube/v3/`,
+      TUBELENS_YOUTUBE_WEB_BASE: `http://127.0.0.1:${http.address().port}` },
   }));
 });
 test.after(async () => {
@@ -107,11 +129,11 @@ test.after(async () => {
 
 test("advertises the full tool and prompt set", async () => {
   const tools = (await client.listTools()).tools.map((t) => t.name).sort();
-  assert.deepEqual(tools, ["channel_report", "channel_videos", "compare_channels", "get_channels", "get_videos", "keyword_ideas", "library",
+  assert.deepEqual(tools, ["channel_report", "channel_videos", "compare_channels", "find_clips", "get_channels", "get_videos", "keyword_ideas", "library",
     "score_metadata", "search_channels", "search_videos", "similar_channels", "similar_videos", "trend_categories", "trending_videos",
     "video_comments", "video_history"]);
   const prompts = (await client.listPrompts()).prompts.map((p) => p.name).sort();
-  assert.deepEqual(prompts, ["channel_audit", "comment_insights", "title_review", "video_chapters", "video_ideas", "write_description", "write_script", "write_titles"]);
+  assert.deepEqual(prompts, ["channel_audit", "clip_shorts", "comment_insights", "title_review", "video_chapters", "video_ideas", "write_description", "write_script", "write_titles"]);
 });
 
 test("get_videos batches with subscribers and SEO, reports missing ids", async () => {
@@ -190,6 +212,34 @@ test("library saves, lists and removes competitors and bookmarks on disk", async
   assert.equal((await call("library", { collection: "bookmarks", action: "remove", items: ["vid00000004"] })).data.total, 1);
   const onDisk = JSON.parse(await readFile(join(home, "library.json"), "utf8"));
   assert.equal(onDisk.competitors[0].key, CH.B);
+});
+
+test("find_clips ranks replay peaks, adds comment moments and labels chapters", async () => {
+  const { data, error } = await call("find_clips", { video: "https://www.youtube.com/watch?v=clipvideo01", count: 5 });
+  assert.equal(error, null);
+  assert.equal(data.heatmap.available, true);
+  assert.equal(data.heatmap.sparkline.length, 50);
+  const [top] = data.clips;
+  assert.equal(top.source, "most_replayed");
+  assert.ok(top.start <= 300 && top.end >= 306, `top clip ${top.start}-${top.end} should cover the 5:00 peak`);
+  assert.ok(top.lengthSeconds >= 15 && top.lengthSeconds <= 60);
+  assert.equal(top.commentMentions, 2);
+  assert.equal(top.chapter, "The bake");
+  assert.equal(top.url, `https://youtu.be/clipvideo01?t=${top.start}`);
+  assert.ok(data.clips.every((c) => c.start >= 18), "no clip from the opening spike");
+  const fromComments = data.clips.find((c) => c.source === "comments");
+  assert.ok(fromComments && fromComments.start <= 500 && fromComments.end >= 500, "8:20 comment moment becomes a clip");
+  for (let i = 1; i < data.clips.length; i++)
+    for (let j = 0; j < i; j++) assert.ok(data.clips[i].start >= data.clips[j].end || data.clips[i].end <= data.clips[j].start, "clips don't overlap");
+  assert.equal(data.commentMoments[0].mentions, 2);
+});
+
+test("find_clips explains when there is nothing to go on", async () => {
+  const { data } = await call("find_clips", { video: "noheatmap01" });
+  assert.equal(data.heatmap.available, false);
+  assert.deepEqual(data.clips, []);
+  assert.ok(data.notes.some((n) => /No clip moments/.test(n)));
+  assert.match((await call("find_clips", { video: "noheatmap01", min_seconds: 90, max_seconds: 30 })).error, /min_seconds/);
 });
 
 test("channel_report and compare_channels still work", async () => {
