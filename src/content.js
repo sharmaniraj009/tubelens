@@ -72,6 +72,19 @@
     return document.querySelector("video.html5-main-video") ?? document.querySelector("#movie_player video") ?? document.querySelector("video");
   }
   const currentTime = () => playerVideo()?.currentTime ?? 0;
+  // Ads play in the same <video> element, so its time is the ad's while one runs.
+  const adPlaying = () => Boolean(playerVideo()?.closest(".html5-video-player")?.classList.contains("ad-showing"));
+  const AD_WAIT = "An ad is playing. Try again once the video is back.";
+  const isTyping = (node) => node instanceof HTMLElement && (node.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(node.tagName));
+
+  // YouTube's player shortcuts (k, j, l, f, space, digits…) listen on the page, and keys pressed
+  // inside the panel reach them too. Keep the keys a panel control uses inside the panel.
+  function keepKeysInPanel(e) {
+    if (isTyping(e.composedPath()[0]) || /^( |Enter|Arrow\w+)$/.test(e.key)) e.stopPropagation();
+  }
+  // After a mouse click on a playback control, give the keyboard back to the player so space
+  // pauses the video instead of pressing the control again.
+  const releaseFocus = (e) => { if (e?.detail) e.currentTarget?.blur?.(); };
 
   // ---- Styles ----
 
@@ -136,13 +149,16 @@
       host = document.createElement("div");
       host.id = HOST_ID;
       host.attachShadow({ mode: "open" });
+      for (const type of ["keydown", "keypress", "keyup"]) host.addEventListener(type, keepKeysInPanel);
     }
-    // Docked in the right column when YouTube has rendered it; floating until then (and on Shorts).
-    const anchor = document.querySelector("#secondary-inner") ?? document.querySelector("#secondary");
+    // Docked in the right column of a watch page once YouTube has rendered it; floating until
+    // then and on Shorts. YouTube keeps the watch page in the DOM, hidden, while a Short plays.
+    const shown = (selector) => [...document.querySelectorAll(selector)].find((n) => n.getClientRects().length);
+    const anchor = location.pathname === "/watch" ? shown("#secondary-inner") ?? shown("#secondary") : null;
     if (anchor) {
       host.removeAttribute("style");
       if (host.parentElement !== anchor) anchor.prepend(host);
-    } else if (!host.isConnected) {
+    } else if (host.parentElement !== document.body) {
       Object.assign(host.style, { position: "fixed", right: "16px", bottom: "16px", width: "380px",
         maxHeight: "75vh", overflow: "auto", zIndex: 9999 });
       document.body.append(host);
@@ -311,6 +327,9 @@
         : "YouTube hasn't published “Most replayed” data for this video (it needs enough views). You can still mark clips yourself."),
       suggestions.length ? el("h3", {}, "Suggested clips") : null,
       suggestions.length ? el("div", {}, suggestions.map(suggestionRow)) : null,
+      heatmap.length && !suggestions.length
+        ? el("div", { class: "note" }, "No moment stands out: viewers watch this video about evenly, so there's nothing to suggest. Mark clips yourself below.")
+        : null,
       markerBox(),
       el("h3", {}, `Saved clips (${saved.length})`),
       saved.length
@@ -330,7 +349,10 @@
     const kids = state.suggestions.map((c) =>
       svg("rect", { class: "sugg", x: x(c.start), y: 0, width: width(c.start, c.end), height: 4 }, tip(`Suggested ${Clips.rangeLabel(c)}`)));
     if (state.heatmap.length) {
-      const pts = state.heatmap.map((m) => `${x(m.start + m.duration / 2)},${(H - 3 - m.intensity * (H - 10)).toFixed(1)}`);
+      // Scaled to the hottest moment after the opening spike, which would flatten everything else.
+      const peak = Clips.heatProfile(state.heatmap, { durationSeconds: total }).peak;
+      const level = (m) => (peak > 0 ? Math.min(1, m.intensity / peak) : m.intensity);
+      const pts = state.heatmap.map((m) => `${x(m.start + m.duration / 2)},${(H - 3 - level(m) * (H - 10)).toFixed(1)}`);
       kids.push(svg("path", { class: "heat", d: `M0,${H} L${pts.join(" L")} L${W},${H} Z` }));
     }
     for (const c of state.saved)
@@ -342,6 +364,7 @@
     kids.push(live.playhead);
     const jump = (e) => {
       const r = e.currentTarget.getBoundingClientRect();
+      releaseFocus(e);
       seek(((e.clientX - r.left) / r.width) * total);
     };
     const keys = (e) => {
@@ -359,16 +382,16 @@
   function suggestionRow(c) {
     const isSaved = state.saved.some((s) => s.start === c.start && s.end === c.end);
     return el("div", { class: "clip" },
-      el("button", { class: "icon", title: "Preview this clip", "aria-label": `Preview ${Clips.rangeLabel(c)}`, onclick: () => playClip(c) }, "▶"),
+      el("button", { class: "icon", title: "Preview this clip", "aria-label": `Preview ${Clips.rangeLabel(c)}`, onclick: (e) => playClip(c, e) }, "▶"),
       el("span", { class: "range" }, Clips.rangeLabel(c)),
-      el("span", { class: "label meta" }, `${c.length}s · replay ${c.intensity}%`),
+      el("span", { class: "label meta", title: `Replayed ${c.lift}× as often as a typical moment of this video` }, `${c.length}s · ${c.lift}× typical`),
       el("button", { disabled: isSaved ? "" : null, onclick: () => saveClip({ start: c.start, end: c.end, note: "", source: "suggested" }) },
         isSaved ? "Saved" : "Save"));
   }
 
   function savedRow(c) {
     return el("div", { class: "clip" },
-      el("button", { class: "icon", title: "Play this clip", "aria-label": `Play ${Clips.rangeLabel(c)}`, onclick: () => playClip(c) }, "▶"),
+      el("button", { class: "icon", title: "Play this clip", "aria-label": `Play ${Clips.rangeLabel(c)}`, onclick: (e) => playClip(c, e) }, "▶"),
       el("span", { class: "range" }, Clips.rangeLabel(c)),
       el("span", { class: "label", title: c.note || "" }, c.note || el("span", { class: "meta" }, `${Math.round(c.end - c.start)}s`)),
       el("button", { class: "icon", title: "Copy a link that starts at this clip", onclick: () => copy(Clips.shareUrl(state.video.videoId, c.start), "Link copied.") }, "Link"),
@@ -393,7 +416,7 @@
         el("div", { class: "wide row" }, note),
         el("div", { class: "wide row" },
           el("button", { class: "primary", disabled: len >= 1 ? null : "", onclick: saveDraft, title: "Save (Alt+S)" }, len >= 1 ? `Save clip (${Math.round(len)}s)` : "Save clip"),
-          el("button", { disabled: len >= 1 ? null : "", onclick: () => playClip(d) }, "Preview"),
+          el("button", { disabled: len >= 1 ? null : "", onclick: (e) => playClip(d, e) }, "Preview"),
           d.start != null || d.end != null ? el("button", { onclick: clearDraft }, "Clear") : null,
           live.now)),
       len > 180 ? el("div", { class: "note mid" }, "This is longer than 3 minutes, the Shorts limit.") : null,
@@ -403,18 +426,24 @@
 
   function seek(seconds, play = false) {
     const v = playerVideo();
-    if (!v) return flash("Couldn't find the video player.");
+    if (!v || adPlaying()) {
+      flash(v ? AD_WAIT : "Couldn't find the video player.");
+      return false;
+    }
     v.currentTime = Math.max(0, Math.min(seconds, state?.video.lengthSeconds ?? seconds));
     if (play) v.play()?.catch?.(() => {});
     tick();
+    return true;
   }
 
-  function playClip(c) {
-    preview = { start: c.start, end: c.end };
-    seek(c.start, true);
+  function playClip(c, e) {
+    releaseFocus(e);
+    preview = null; // so the seek can't trip an earlier preview's end
+    if (seek(c.start, true)) preview = { start: c.start, end: c.end };
   }
 
   function markStart() {
+    if (adPlaying()) return flash(AD_WAIT);
     const at = Math.floor(currentTime());
     const d = state.draft;
     d.start = at;
@@ -424,6 +453,7 @@
   }
 
   function markEnd() {
+    if (adPlaying()) return flash(AD_WAIT);
     const at = Math.ceil(currentTime());
     const d = state.draft;
     const guessed = d.start == null;
@@ -492,7 +522,7 @@
   function tick() {
     if (!state) return;
     const v = playerVideo();
-    if (!v) return;
+    if (!v || adPlaying()) return; // a preview carries on once the ad is over
     const now = v.currentTime;
     if (live.now) live.now.textContent = `Now ${t(now)}`;
     if (live.playhead && live.toX) {
@@ -516,9 +546,7 @@
     const action = { BracketLeft: markStart, BracketRight: markEnd, KeyS: saveDraft }[e.code];
     if (!action) return;
     const path = e.composedPath();
-    const target = path[0];
-    const typing = target instanceof HTMLElement && (target.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName));
-    if (typing && !path.some((n) => n.id === HOST_ID)) return; // leave YouTube's own text boxes alone
+    if (isTyping(path[0]) && !path.some((n) => n.id === HOST_ID)) return; // leave YouTube's own text boxes alone
     e.preventDefault();
     e.stopPropagation();
     if (prefs.tab !== "clips" || prefs.collapsed) {

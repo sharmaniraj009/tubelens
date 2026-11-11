@@ -64,6 +64,35 @@ test("suggestClips ignores cold stretches and handles empty input", () => {
   assert.deepEqual(C.suggestClips([], {}), []);
 });
 
+test("suggestClips picks the choruses of an evenly watched video instead of tiling it", () => {
+  // A music video: a broad warm plateau with two choruses a little above it.
+  const hm = heat((i) => (i < 3 ? 0.9 - i * 0.1 : Math.abs(i - 30) <= 2 ? 1 - Math.abs(i - 30) * 0.03
+    : Math.abs(i - 60) <= 2 ? 0.97 - Math.abs(i - 60) * 0.03 : 0.8), 280);
+  const clips = C.suggestClips(hm, { durationSeconds: 280, count: 5 });
+  assert.equal(clips.length, 2, JSON.stringify(clips));
+  assert.ok(clips[0].start <= 84 && clips[0].end >= 87, "first chorus first");
+  assert.ok(clips[1].start <= 168 && clips[1].end >= 171);
+  assert.ok(clips.every((c) => c.length <= 30), "a clip covers the chorus, not a whole minute of plateau");
+  assert.equal(clips[0].lift, 1.3);
+});
+
+test("suggestClips suggests nothing for a Short whose heatmap only falls from the start", () => {
+  const hm = heat((i) => Math.max(0.005, Math.exp(-i / 6) + (i === 90 ? 0.01 : 0)), 60);
+  assert.deepEqual(C.suggestClips(hm, { durationSeconds: 60 }), []);
+  const flat = heat(() => 0.5, 300);
+  assert.deepEqual(C.suggestClips(flat, { durationSeconds: 300 }), []);
+});
+
+test("heatProfile finds the end of the opening spike, the typical level and the peak", () => {
+  const hm = heat((i) => (i === 60 ? 0.8 : introSpike(i)));
+  const p = C.heatProfile(hm, { durationSeconds: 600 });
+  assert.ok(p.intro >= 18 && p.intro <= 30, String(p.intro));
+  assert.equal(p.typical, 0.1);
+  assert.equal(p.peak, 0.8);
+  assert.equal(C.heatProfile([]), null);
+  assert.equal(C.suggestClips(hm, { durationSeconds: 600 })[0].lift, 8);
+});
+
 test("suggestClips keeps clips inside short videos", () => {
   const hm = heat((i) => (i === 80 ? 1 : 0.3), 40);
   for (const c of C.suggestClips(hm, { durationSeconds: 40, minSeconds: 15, maxSeconds: 60 })) {

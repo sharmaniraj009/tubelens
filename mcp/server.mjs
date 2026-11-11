@@ -357,7 +357,7 @@ server.registerTool("find_clips", {
   }
 
   if (!heatmap.length) notes.push("YouTube shows no 'Most replayed' data for this video (it appears once a video has enough views).");
-  else notes.push("replayIntensity is relative to this video's most replayed segment (100). The opening seconds are skipped: almost every heatmap starts high because playback starts there.");
+  else notes.push("replayVsTypical is how many times as often viewers replay the clip's peak as a typical moment of this video; replayIntensity is relative to its most replayed segment (100). The opening seconds are skipped: almost every heatmap starts high because playback starts there. Only moments that clearly stand out are suggested, so evenly watched videos and Shorts can get few or none.");
   if (!picked.length) notes.push("No clip moments found. Ask the creator for a transcript or the moments they have in mind.");
   notes.push("Clips are suggestions. Cut them in an editor, or with YouTube's 'Edit into a Short' on your own videos.");
 
@@ -371,7 +371,7 @@ server.registerTool("find_clips", {
       return {
         rank: i + 1, source: c.source,
         start: c.start, end: c.end, startTimestamp: clips.formatTime(c.start), endTimestamp: clips.formatTime(c.end), lengthSeconds: c.length,
-        peakTimestamp: clips.formatTime(c.peak), replayIntensity: c.intensity,
+        peakTimestamp: clips.formatTime(c.peak), replayIntensity: c.intensity, replayVsTypical: c.lift ?? undefined,
         commentMentions: inClip.reduce((n, m) => n + m.mentions, 0) || undefined,
         chapter: clips.chapterAt(chapters, c.peak)?.title,
         url: clips.shareUrl(id, c.start), embedUrl: clips.embedUrl(id, c.start, c.end),
@@ -655,7 +655,7 @@ server.registerPrompt("clip_shorts", {
   messages: [{ role: "user", content: { type: "text", text:
 `Find ${count || 5} Shorts in ${video}.
 1. Call find_clips for the video with count=${count || 5}. If it returns no clips, ask me for a transcript or the moments I have in mind; don't guess timestamps.
-${transcript ? `2. Use this transcript to name each moment, tighten its start/end to whole sentences, and drop clips that don't make sense on their own:\n${transcript}\n` : "2. Without a transcript you can't see what is said in each clip: say so, and phrase hooks and titles as suggestions for me to check against the footage.\n"}3. For each clip give: start–end with its link, why it should work (replay intensity, comment mentions, chapter), a suggested trim so the hook lands in the first 2 seconds, on-screen hook text (≤ 6 words), a Short title (≤ 60 characters, scored with score_metadata), and a caption with 2–3 hashtags.
+${transcript ? `2. Use this transcript to name each moment, tighten its start/end to whole sentences, and drop clips that don't make sense on their own:\n${transcript}\n` : "2. Without a transcript you can't see what is said in each clip: say so, and phrase hooks and titles as suggestions for me to check against the footage.\n"}3. For each clip give: start–end with its link, why it should work (replays vs a typical moment, comment mentions, chapter), a suggested trim so the hook lands in the first 2 seconds, on-screen hook text (≤ 6 words), a Short title (≤ 60 characters, scored with score_metadata), and a caption with 2–3 hashtags.
 Rank them by expected performance. Remind me to cut the clips in an editor or with YouTube's "Edit into a Short", and only from videos I own or have rights to.` } }],
 }));
 
