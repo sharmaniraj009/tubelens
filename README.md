@@ -5,18 +5,31 @@ your machine — there is no TubeLens backend.
 
 ## Extension features
 A **Getting started** page opens on install. It explains what works with no setup and walks
-through adding the optional API key, with a *Save and test* button.
-- **Video panel** on every watch/Shorts page, with four tabs:
+through adding the optional API key, with a *Save and test* button. The **Academy**
+(`src/academy.html`) is a 12-lesson user guide with screenshots and progress tracking; the
+panel's **?** button opens the lesson for the tab you're on.
+- **Video panel** on every watch/Shorts page, with five tabs:
   - *Overview*: views, views/hour, publish date, length, category, likes, comments,
-    engagement and subscribers, plus buttons for *Thumbnail from this frame*, *Edit thumbnail*,
-    *Find clips* and *Channel report*.
+    engagement and subscribers, plus buttons for the thumbnail maker, clips, engagement, the
+    channel report and the upload planner.
   - *SEO*: a 100-point score with the failed checks listed first.
   - *Tags*: the video's tags, with *Copy tags*.
-  - *Clips*: YouTube's "Most replayed" curve as a clickable timeline, up to 5 suggested clips
-    around its peaks (the opening spike is skipped), and start/end marking with buttons or
-    `Alt+[` / `Alt+]` / `Alt+S`. Saved clips can be previewed (playback stops at the end),
-    copied as links or as a chapter block, and deleted with undo. TubeLens doesn't download or
-    cut video.
+  - *Clips*: YouTube's "Most replayed" curve as a timeline (click to jump, drag to select a
+    clip), suggested clips around the moments replayed clearly more than the rest ("2.4×
+    typical"), start/end marking with buttons or `Alt+[` / `Alt+]` / `Alt+S`, *Clip the last
+    30s* (`Alt+C`), ±1 s nudges for each edge, loop preview, and editing of saved clips. Saved
+    clips can be previewed, copied as links or as a chapter block, planned as Shorts in the
+    upload planner, and deleted with undo. TubeLens doesn't download or cut video.
+  - *Engage*: an engagement checklist (a question for viewers, a comment ask, links to more of
+    your videos, chapters, the opening line, title length), pinned-comment drafts built from
+    the video's chapters and most replayed moments, and, with an API key, the top comments that
+    have no reply yet, questions first, with links that open each one.
+- **Upload planner** (`src/planner.html`): a month calendar for videos, Shorts and community
+  posts (click a day to add, drag to move), *Fill my calendar* (video days plus Shorts spread
+  between them), a status and before/at/after-publishing checklist per upload, undated ideas,
+  `.ics` export for Google/Outlook/Apple Calendar, *Shorts from clips*, and a *Strategy* tab
+  (needs a key): upload rhythm, a day × time-of-day grid of views against your median, best
+  slots, plain-language recommendations and a weekly playbook.
 - **Thumbnail maker** (`src/thumbnail.html`): 1280×720 editor with background controls, text,
   image, shape and effect layers, templates, undo/redo, YouTube-size previews (home, search,
   up-next, mobile; light/dark), legibility/contrast/duration-badge checks, and export under
@@ -26,8 +39,8 @@ through adding the optional API key, with a *Save and test* button.
     long-form, outliers, underperformers and an SEO audit of recent uploads.
   - *Competitors* — track channels and compare them side by side.
   - *Outlier finder* — search a topic and rank videos by how far they beat their channel's average.
-- **Popup**: shortcuts to Channel research and the Thumbnail maker, a reminder when no API key
-  is set, keyword ideas from YouTube autocomplete, a pre-upload SEO checker, and **My clips**,
+- **Popup**: shortcuts to the Upload planner, Channel research and the Thumbnail maker, your
+  next planned upload, a reminder when no API key is set, keyword ideas from YouTube autocomplete, a pre-upload SEO checker, and **My clips**,
   which lists saved clips from every video and can copy them all or download them as CSV.
 
 ## MCP server (Claude Code / Claude Desktop)
@@ -83,7 +96,9 @@ searches/day). The extension stores the key only in `chrome.storage.local`.
 - Outlier ratios use channel averages from public counts, so they are approximate.
 - "Most replayed" data appears only once a video has enough views, and its intensities are
   relative to that video's hottest moment. Clip suggestions are starting points to trim, not
-  edits.
+  edits, and evenly watched videos or Shorts often get none.
+- Best posting times come from your own uploads' views, so a slot with a few uploads is a hint;
+  YouTube Studio's "When your viewers are on YouTube" is the authoritative audience view.
 - Transcripts: YouTube now blocks unauthenticated caption downloads, so the writing prompts
   take a transcript or notes that you supply.
 
@@ -105,7 +120,7 @@ First-time store setup, listing copy, privacy answers and the CI secrets are cov
 ## Develop
 ```
 npm install
-npm test            # unit tests (scoring, parsing, Data API client, research, clips, thumbnail checks)
+npm test            # unit tests (scoring, parsing, Data API client, research, clips, planner, engagement, thumbnail checks)
 npm run test:live   # MCP smoke test against live YouTube
 npm run package     # dist/tubelens-extension-<version>.zip for the Chrome Web Store
 ```

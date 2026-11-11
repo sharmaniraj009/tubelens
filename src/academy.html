@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>TubeLens Academy</title>
+  <link rel="stylesheet" href="research.css" />
+  <link rel="stylesheet" href="academy.css" />
+</head>
+<body>
+  <div class="layout">
+    <aside class="toc">
+      <h1>TubeLens Academy</h1>
+      <p class="note">A short guide to every tool, with screenshots. About 15 minutes in all.</p>
+      <div class="progress" aria-hidden="true"><div id="progress-bar"></div></div>
+      <p id="progress-text" class="note" role="status"></p>
+      <nav aria-label="Lessons"><ol id="toc"></ol></nav>
+    </aside>
+
+    <main>
+      <article class="lesson" id="start" data-title="Start here">
+        <p class="kicker">Lesson 1 · 2 min</p>
+        <h2>Start here</h2>
+        <p class="lead">TubeLens adds four things to YouTube: a panel next to every video, a toolbar popup, an upload planner and a thumbnail maker. Everything runs in your browser.</p>
+        <figure><img src="academy/01-overview.webp" width="800" alt="A YouTube video with the TubeLens panel to the right of the player" loading="lazy" />
+          <figcaption>The panel docks to the right of the player. Hide it with <b>Hide</b>; it remembers the tab you used last.</figcaption></figure>
+        <ol class="steps">
+          <li>Click the puzzle-piece icon in Chrome's toolbar and pin <b>TubeLens</b>, so the popup is one click away.</li>
+          <li>Open any video on YouTube. The panel appears beside the player, and floats in the corner on Shorts.</li>
+          <li>Optional: add a free YouTube Data API key (lesson 12). It adds likes, comments and subscribers, and turns on comment replies, channel research and the strategy report.</li>
+        </ol>
+        <p class="tip"><b>Tip</b> The <b>Overview</b> tab has shortcuts to every tool for the video you're watching: thumbnails, clips, engagement, the channel report and the planner.</p>
+      </article>
+
+      <article class="lesson" id="seo" data-title="Read a video at a glance">
+        <p class="kicker">Lesson 2 · 1 min</p>
+        <h2>Read a video at a glance</h2>
+        <div class="split">
+          <div>
+            <p class="lead">Use the panel on your own videos to find quick fixes, and on others' videos to see what works in your niche.</p>
+            <ol class="steps">
+              <li><b>Overview</b> shows views, views per hour since publishing, the publish date, length and category.</li>
+              <li><b>SEO</b> scores the title, description and tags out of 100 and lists exactly which checks fail. Type your own <b>target keyword</b> to score against it.</li>
+              <li><b>Tags</b> shows the video's public tags with one-click copy.</li>
+            </ol>
+            <p class="tip"><b>Good to know</b> The score is TubeLens's own transparent checklist, not YouTube's ranking. Fix the failed checks with the most points first.</p>
+          </div>
+          <figure><img src="academy/02-seo.webp" width="377" alt="The SEO tab with a score and a list of checks" loading="lazy" /></figure>
+        </div>
+      </article>
+
+      <article class="lesson" id="find-clips" data-title="Find the moments viewers replay">
+        <p class="kicker">Lesson 3 · 2 min</p>
+        <h2>Find the moments viewers replay</h2>
+        <div class="split">
+          <div>
+            <p class="lead">YouTube's “Most replayed” data shows where viewers rewind and rewatch. Those moments make the best Shorts, highlights and hooks.</p>
+            <ol class="steps">
+              <li>Open the <b>Clips</b> tab. The curve is the replay heat across the video; the opening spike is trimmed so real peaks stand out.</li>
+              <li><b>Suggested clips</b> sit around the peaks. “2.4× typical” means that moment is replayed 2.4 times as often as a normal moment of the video.</li>
+              <li>Press <b>▶</b> to preview. Playback stops at the clip's end. Press <b>Save</b> to keep it.</li>
+              <li>Click anywhere on the curve to jump there; hover to see the time.</li>
+            </ol>
+            <p class="tip"><b>Good to know</b> YouTube only publishes replay data once a video has enough views. If a video is watched evenly, TubeLens says so instead of inventing suggestions, and you can still mark clips yourself.</p>
+          </div>
+          <figure><img src="academy/03-clips.webp" width="377" alt="The Clips tab with the replay curve and four suggested clips" loading="lazy" /></figure>
+        </div>
+      </article>
+
+      <article class="lesson" id="mark-clips" data-title="Mark and fine-tune clips">
+        <p class="kicker">Lesson 4 · 2 min</p>
+        <h2>Mark and fine-tune clips</h2>
+        <div class="split">
+          <div>
+            <p class="lead">Three ways to make a clip, whichever is fastest for you.</p>
+            <ol class="steps">
+              <li><b>Drag across the timeline</b> to select a stretch. The label shows the range and length as you drag.</li>
+              <li><b>While watching</b>, press <kbd>Alt+[</kbd> at the start and <kbd>Alt+]</kbd> at the end, or use <b>Set to now</b>.</li>
+              <li><b>Missed it?</b> Press <kbd>Alt+C</kbd> (or <b>Clip the last 30s</b>) right after a great moment. Then press <b>Adjust</b> to trim it.</li>
+            </ol>
+            <p>Then fine-tune: <b>−1s</b> and <b>+1s</b> move each edge (Shift-click for 5 seconds). Moving the start jumps there; moving the end plays the last 3 seconds so you hear the cut. Turn on <b>Loop</b> to repeat the preview while you adjust. Add a note and press <b>Save clip</b> or <kbd>Alt+S</kbd>.</p>
+            <p>Saved clips can be played, <b>edited</b>, copied as links, copied as a <b>chapter list</b> for your description, or deleted (with Undo).</p>
+            <p class="tip"><b>Tip</b> Keys you type in the panel stay in the panel, so writing a note never pauses or skips the video.</p>
+          </div>
+          <figure><img src="academy/04-mark.webp" width="377" alt="A clip being marked, with nudge buttons for the start and end" loading="lazy" /></figure>
+        </div>
+      </article>
+
+      <article class="lesson" id="shorts" data-title="Turn clips into Shorts">
+        <p class="kicker">Lesson 5 · 1 min</p>
+        <h2>Turn clips into Shorts</h2>
+        <p class="lead">Your best moments are free content for the days between uploads.</p>
+        <ol class="steps">
+          <li>Press <b>Short</b> on a saved clip, or <b>Plan all as Shorts</b>. Each goes on the next free day in the upload planner.</li>
+          <li>The planner's <b>Shorts from clips</b> tab lists every clip you've saved, from every video, with what's already planned.</li>
+          <li>Cut the clip in your editor, or use YouTube's “Edit into a Short” on your own video, then set the full video as the Short's <b>Related video</b> so viewers can follow it.</li>
+        </ol>
+        <figure><img src="academy/05-shorts.webp" width="800" alt="The Shorts from clips tab listing saved clips and their planned dates" loading="lazy" /></figure>
+        <p class="tip"><b>Good to know</b> TubeLens never downloads or cuts video. Only clip videos you own or have the rights to use.</p>
+      </article>
+
+      <article class="lesson" id="engage" data-title="Get more comments and replies">
+        <p class="kicker">Lesson 6 · 2 min</p>
+        <h2>Get more comments and replies</h2>
+        <div class="split">
+          <div>
+            <p class="lead">The <b>Engage</b> tab helps a video start conversations and keep viewers on your channel.</p>
+            <ol class="steps">
+              <li>The <b>engagement checklist</b> looks for a question for viewers, an invitation to comment, links to more of your videos, chapters, a clear opening line and a title that fits on phones. Hover a check to see why it matters.</li>
+              <li><b>Pinned comment ideas</b> are ready to edit: ask a question, point to the most replayed moments (timestamps become links on YouTube) or ask what to make next. Copy one, post it under your video and pin it.</li>
+              <li><b>Find comments to answer</b> (needs an API key, 1 unit) lists the top comments with no reply yet, questions first. <b>Reply</b> opens the video with that comment highlighted.</li>
+            </ol>
+            <p class="tip"><b>Tip</b> Answering early comments, especially questions, is the quickest engagement win most channels skip.</p>
+          </div>
+          <figure><img src="academy/06-engage.webp" width="377" alt="The Engage tab with a checklist and pinned comment drafts" loading="lazy" /></figure>
+        </div>
+      </article>
+
+      <article class="lesson" id="planner" data-title="Plan your uploads">
+        <p class="kicker">Lesson 7 · 2 min</p>
+        <h2>Plan your uploads</h2>
+        <p class="lead">Open the <b>Upload planner</b> from the popup or the panel's Overview tab.</p>
+        <figure><img src="academy/07-planner.webp" width="800" alt="The upload planner's month calendar with videos and Shorts" loading="lazy" /></figure>
+        <ol class="steps">
+          <li><b>Fill my calendar</b>: choose your video days and time, how many Shorts a week and for how long. TubeLens adds slots and spreads the Shorts between your videos. Undo if you change your mind.</li>
+          <li><b>Click a day</b> to plan an upload there; <b>drag</b> an upload to move it. Blue is a video, red a Short, green a community post.</li>
+          <li><b>Click an upload</b> to name it, set its status (idea → published) and work through its checklist: before, at and after publishing.</li>
+          <li>Keep ideas without a date at the bottom, and use <b>Export to calendar</b> to get reminders in Google Calendar, Outlook or Apple Calendar.</li>
+        </ol>
+        <div class="split">
+          <div>
+            <p>The checklist covers what's easy to forget: chapters, captions, the end screen, a playlist, the pinned comment, replying in the first hours and planning Shorts from the new video.</p>
+            <p class="tip"><b>Tip</b> The popup shows your next planned upload, so you see it every time you open TubeLens.</p>
+          </div>
+          <figure><img src="academy/08-editor.webp" width="374" alt="Editing an upload with its status and checklist" loading="lazy" /></figure>
+        </div>
+      </article>
+
+      <article class="lesson" id="strategy" data-title="Build your upload strategy">
+        <p class="kicker">Lesson 8 · 2 min</p>
+        <h2>Build your upload strategy</h2>
+        <p class="lead">The planner's <b>Strategy</b> tab reads your channel's last 100 uploads (needs an API key, about 5 units) and turns them into a plan.</p>
+        <ol class="steps">
+          <li>Enter your channel and press <b>Analyse my channel</b>.</li>
+          <li>Check your rhythm: uploads a week, the usual and longest gap, days since the last upload and the share of Shorts.</li>
+          <li><b>When your uploads do best</b> compares each day and time with your median views, in your time zone. Green beats your median; red falls short.</li>
+          <li>Read <b>What to do next</b>, then press <b>Use these in the calendar</b> to fill your best days and time into the planner.</li>
+        </ol>
+        <figure><img src="academy/09-strategy.webp" width="800" alt="The strategy report with upload rhythm, advice and a day-by-time heat map (example data)" loading="lazy" />
+          <figcaption>Example data. Small samples move a lot, so treat a slot with two uploads as a hint, not a rule.</figcaption></figure>
+        <p class="tip"><b>The weekly plan</b> One long video a week at your best time; two or three Shorts from its most replayed moments on the days in between; a community post mid-week; pin a question and reply in the first hours; after 24–48 hours compare views per hour with your usual and test a new thumbnail or title if it lags.</p>
+      </article>
+
+      <article class="lesson" id="popup" data-title="Research keywords and check drafts">
+        <p class="kicker">Lesson 9 · 1 min</p>
+        <h2>Research keywords and check drafts</h2>
+        <div class="split">
+          <div>
+            <p class="lead">Click the TubeLens icon in the toolbar.</p>
+            <ol class="steps">
+              <li><b>Keyword ideas</b>: type a topic and press Find. Ideas come from YouTube's search autocomplete; “hits” counts how many of 27 lookups suggested the phrase, a popularity hint rather than search volume. Click one to copy it.</li>
+              <li><b>SEO checker</b>: paste a draft title, description and tags before you upload. It's saved as you type.</li>
+              <li><b>My clips</b>: every clip from every video, with copy-all and a CSV download for your editor.</li>
+            </ol>
+          </div>
+          <figure><img src="academy/10-popup.webp" width="424" alt="The toolbar popup with keyword ideas" loading="lazy" /></figure>
+        </div>
+      </article>
+
+      <article class="lesson" id="thumbnails" data-title="Make thumbnails">
+        <p class="kicker">Lesson 10 · 2 min</p>
+        <h2>Make thumbnails</h2>
+        <p class="lead">Start from any frame with <b>Thumbnail from this frame</b>, or from the current thumbnail with <b>Edit thumbnail</b>.</p>
+        <figure><img src="academy/11-thumbnail.webp" width="800" alt="The thumbnail maker with a frame, a template and readability checks" loading="lazy" /></figure>
+        <ol class="steps">
+          <li>Pick a <b>template</b>, or add text, image, shape and effect layers. Click any text on the canvas to edit it.</li>
+          <li>Check <b>How it looks on YouTube</b>: previews at real sizes, light and dark.</li>
+          <li>Fix anything the <b>Checks</b> flag, such as small text, low contrast or the duration badge covering something.</li>
+          <li><b>Export PNG</b> keeps the file under YouTube's 2 MB limit. Save the project to come back to it.</li>
+        </ol>
+      </article>
+
+      <article class="lesson" id="research" data-title="Study other channels">
+        <p class="kicker">Lesson 11 · 1 min</p>
+        <h2>Study other channels</h2>
+        <p class="lead"><b>Channel research</b> (from the popup, needs an API key) has three tools.</p>
+        <ol class="steps">
+          <li><b>Channel report</b>: median views, views per subscriber, upload rhythm, best days and hours, outliers, underperformers and the most common SEO issues.</li>
+          <li><b>Competitors</b>: track your channel and a few others side by side, about 3 units per channel per refresh.</li>
+          <li><b>Outlier finder</b>: search a topic and rank videos by how far they beat their own channel's average. 3× or more means the topic or packaging worked. Each search costs 100 units.</li>
+        </ol>
+        <p class="tip"><b>Tip</b> Outliers from small channels are the best ideas to adapt: they show the topic won, not the channel's size.</p>
+      </article>
+
+      <article class="lesson" id="settings" data-title="API key, shortcuts and privacy">
+        <p class="kicker">Lesson 12 · 2 min</p>
+        <h2>API key, shortcuts and privacy</h2>
+        <div class="split">
+          <div>
+            <p class="lead">An API key is free and takes about two minutes. Most tools work without one.</p>
+            <ol class="steps">
+              <li>Open <a href="options.html">Settings</a> and follow the two links to Google Cloud: enable <b>YouTube Data API v3</b>, then create an <b>API key</b>.</li>
+              <li>Paste it and press <b>Save and test</b>.</li>
+            </ol>
+            <p>The free quota is 10,000 units a day. The panel uses about 2 per video, comments to answer 1, a strategy report about 5, a channel report about 3 and each outlier search 100.</p>
+          </div>
+          <figure><img src="academy/12-settings.webp" width="380" alt="The API key section of TubeLens Settings" loading="lazy" /></figure>
+        </div>
+        <h3>Shortcuts on a video page</h3>
+        <table class="keys">
+          <tr><td><kbd>Alt+[</kbd></td><td>Set the clip start to the current time</td></tr>
+          <tr><td><kbd>Alt+]</kbd></td><td>Set the clip end to the current time</td></tr>
+          <tr><td><kbd>Alt+S</kbd></td><td>Save the clip</td></tr>
+          <tr><td><kbd>Alt+C</kbd></td><td>Save the last 30 seconds as a clip</td></tr>
+          <tr><td>Drag on the timeline</td><td>Select a clip</td></tr>
+          <tr><td><kbd>←</kbd> <kbd>→</kbd> on the timeline</td><td>Move 5 seconds</td></tr>
+        </table>
+        <h3>Privacy</h3>
+        <p>Clips, your upload plan, drafts, settings and your API key stay in this browser. TubeLens has no server and collects nothing; it only talks to Google's services to fetch what you ask for. See the <a href="https://github.com/sharmaniraj009/tubelens/blob/main/PRIVACY.md" target="_blank" rel="noopener">privacy policy</a>.</p>
+      </article>
+
+      <footer class="credits note">
+        Screenshots show <i>Spring</i> by Blender Studio, licensed under <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a>, and example data in the strategy report.
+        TubeLens is an independent tool, not affiliated with or endorsed by YouTube or Google.
+      </footer>
+    </main>
+  </div>
+
+  <dialog id="zoom" aria-label="Screenshot"><img alt="" /></dialog>
+  <script src="academy.js"></script>
+</body>
+</html>

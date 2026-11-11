@@ -1,6 +1,7 @@
 "use strict";
 const { score } = globalThis.TubeLensSEO;
 const Clips = globalThis.TubeLensClips;
+const Planner = globalThis.TubeLensPlanner;
 const $ = (id) => document.getElementById(id);
 const band = (s) => (s >= 70 ? "good" : s >= 40 ? "mid" : "bad");
 const el = (tag, attrs = {}, ...kids) => {
@@ -149,3 +150,13 @@ chrome.storage.onChanged.addListener((changes, area) => {
   if (area === "local" && Object.keys(changes).some((k) => k.startsWith("clip:"))) renderClips();
 });
 renderClips();
+
+// The next planned upload, from the upload planner.
+chrome.storage.local.get("plan").then(({ plan }) => {
+  const today = Planner.isoDate(new Date());
+  const next = Planner.sortItems(plan?.items).find((i) => i.date && i.date >= today && i.status !== "published");
+  if (!next) return;
+  const when = Planner.parseDate(next.date).toLocaleDateString(undefined, { weekday: "short", day: "numeric", month: "short" });
+  $("next-up").replaceChildren(el("b", {}, "Next up: "), `${when}${next.time ? ` ${next.time}` : ""} · ${Planner.TYPES[next.type]}: ${next.title || "Untitled"}`);
+  $("next-up").hidden = false;
+});

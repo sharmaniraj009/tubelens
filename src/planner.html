@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>TubeLens upload planner</title>
+  <link rel="stylesheet" href="research.css" />
+  <link rel="stylesheet" href="planner.css" />
+</head>
+<body>
+  <header class="top">
+    <h1>Upload planner</h1>
+    <nav role="tablist">
+      <button role="tab" data-tab="calendar" aria-selected="true">Calendar</button>
+      <button role="tab" data-tab="strategy" aria-selected="false">Strategy</button>
+      <button role="tab" data-tab="shorts" aria-selected="false">Shorts from clips <span id="shorts-count" class="count"></span></button>
+    </nav>
+    <span id="status" class="note" role="status" aria-live="polite"></span>
+  </header>
+
+  <section id="calendar" role="tabpanel">
+    <div class="row wrap">
+      <button type="button" id="prev" aria-label="Previous month">‹</button>
+      <h2 id="month-label" class="month-label"></h2>
+      <button type="button" id="next" aria-label="Next month">›</button>
+      <button type="button" id="today">Today</button>
+      <span class="spacer"></span>
+      <button type="button" id="add" class="primary">Add upload</button>
+      <button type="button" id="ics" title="Download the plan as an .ics file for Google Calendar, Outlook or Apple Calendar">Export to calendar</button>
+    </div>
+    <div id="month" class="month"></div>
+    <p class="note">Click a day to plan an upload there. Drag an upload to another day to move it.</p>
+
+    <div class="cards">
+      <div class="card">
+        <h3>Coming up (next 14 days)</h3>
+        <div id="upcoming"></div>
+      </div>
+      <div class="card">
+        <h3>Fill my calendar</h3>
+        <form id="fill-form">
+          <p class="note">Adds upload slots to rename as you plan. Days that already have that kind of upload are skipped.</p>
+          <div class="field"><span>Video days</span><div id="fill-days" class="days"></div></div>
+          <div class="field-row">
+            <label class="field">Video time <input id="fill-long-time" type="time" value="17:00" /></label>
+            <label class="field">Shorts a week
+              <select id="fill-shorts"><option>0</option><option>1</option><option selected>2</option><option>3</option><option>4</option><option>5</option><option>7</option></select>
+            </label>
+            <label class="field">Short time <input id="fill-short-time" type="time" value="12:00" /></label>
+            <label class="field">For
+              <select id="fill-weeks"><option value="2">2 weeks</option><option value="4" selected>4 weeks</option><option value="8">8 weeks</option></select>
+            </label>
+          </div>
+          <button type="submit">Fill calendar</button>
+          <span class="note">Your best days are on the Strategy tab.</span>
+        </form>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Ideas without a date</h3>
+      <div id="ideas"></div>
+    </div>
+  </section>
+
+  <section id="strategy" role="tabpanel" hidden>
+    <form id="channel-form" class="row wrap">
+      <input id="channel-input" placeholder="Your channel: URL, @handle or UC… id" required aria-label="Your channel" />
+      <button type="submit">Analyse my channel</button>
+      <span class="note">About 5 of your 10,000 daily API units</span>
+    </form>
+    <p id="no-key" class="banner" hidden>Analysing your channel needs a free YouTube Data API key. <a href="options.html">Add it in Settings</a>. The plan below works without one.</p>
+    <div id="strategy-out"></div>
+
+    <div class="card playbook">
+      <h3>A weekly plan that works for most channels</h3>
+      <ol>
+        <li><b>One long video a week, at the same time.</b> Use your best slot above, or the time your audience is online in YouTube Studio's Analytics. Two a week only if you can keep it up.</li>
+        <li><b>Two or three Shorts a week from that video.</b> Save its most replayed moments in the Clips tab and plan them here. Post them on the days in between, and set the full video as each Short's Related video so viewers can follow it.</li>
+        <li><b>A community post or poll mid-week.</b> Ask what viewers want next; the answers are your next titles.</li>
+        <li><b>The first hours after publishing.</b> Pin a comment that asks a question and answer early comments, questions first. The Engage tab in the video panel drafts the comment and finds who to answer.</li>
+        <li><b>After 24–48 hours, compare.</b> Check the video's views per hour against your usual. If it lags, test a new thumbnail or title before changing anything else.</li>
+      </ol>
+      <p class="note">Common practice, not a promise. Check it against your own numbers above and keep what works.</p>
+    </div>
+  </section>
+
+  <section id="shorts" role="tabpanel" hidden>
+    <p class="note">Every clip you've saved from a video page. Plan one as a Short and it goes on the next free day in the calendar, with a link back to the moment.</p>
+    <div id="shorts-out"></div>
+  </section>
+
+  <dialog id="editor" aria-labelledby="editor-title">
+    <form id="editor-form">
+      <h2 id="editor-title">Upload</h2>
+      <label class="field">Title <input id="f-title" placeholder="Working title" /></label>
+      <div class="field-row">
+        <label class="field">Type <select id="f-type"></select></label>
+        <label class="field">Status <select id="f-status"></select></label>
+        <label class="field">Date <input id="f-date" type="date" /></label>
+        <label class="field">Time <input id="f-time" type="time" /></label>
+      </div>
+      <p id="f-clip" class="note" hidden></p>
+      <label class="field">Notes <textarea id="f-notes" rows="3" placeholder="Hook, key points, links…"></textarea></label>
+      <fieldset>
+        <legend>Checklist <span id="f-progress" class="note"></span></legend>
+        <div id="f-checks"></div>
+      </fieldset>
+      <div class="row end">
+        <button type="button" id="f-delete" class="danger">Delete</button>
+        <span class="spacer"></span>
+        <button type="button" id="f-cancel">Cancel</button>
+        <button type="submit">Save</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="../lib/seo.js"></script>
+  <script src="../lib/ytapi.js"></script>
+  <script src="../lib/research.js"></script>
+  <script src="../lib/clips.js"></script>
+  <script src="../lib/planner.js"></script>
+  <script src="planner.js"></script>
+</body>
+</html>

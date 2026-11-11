@@ -35,11 +35,24 @@ New publishers can have at most two published extensions.
 TubeLens is a toolkit for video creators who publish on YouTube. It adds a panel next to every video and a toolbar popup, and it runs entirely in your browser.
 
 CLIPS
-• See the "Most replayed" curve for any video as a clickable timeline
-• Get suggested clips around the moments viewers replay most
-• Mark your own clips with Alt+[ and Alt+], add a note, and save with Alt+S
-• Preview a clip, copy a link that starts at it, or copy your clips as a chapter block
-• Find the clips from every video in the popup, and export them as CSV
+• See the "Most replayed" curve for any video, and drag across it to select a clip
+• Get suggested clips around the moments viewers replay far more than the rest
+• Mark clips with Alt+[ and Alt+], nudge each edge by a second, and save with Alt+S
+• Missed a great moment? Alt+C saves the last 30 seconds
+• Preview or loop a clip, edit it, copy a link that starts at it, or copy your clips as chapters
+• Plan clips as Shorts, and export every clip as CSV
+
+ENGAGEMENT
+• A checklist of what invites comments and keeps viewers watching
+• Pinned-comment drafts with a question and your most replayed moments
+• The top comments still waiting for a reply, questions first (with a free API key)
+
+UPLOAD PLANNER
+• A calendar for videos, Shorts and community posts, with drag to reschedule
+• Fill a month in one click: your video days, with Shorts spread in between
+• A before, at and after publishing checklist for every upload
+• Your best days and times to post, from your own channel's numbers (with a free API key)
+• Export the plan to Google Calendar, Outlook or Apple Calendar
 
 SEO AND STATS
 • Views, views per hour, publish date, length, category and tags for any video
@@ -57,6 +70,9 @@ CHANNEL RESEARCH (with an optional free API key)
 • Track competitors side by side
 • Outlier finder: videos that beat their channel's average
 
+ACADEMY
+• A built-in, step-by-step guide to every tool, with screenshots
+
 PRIVACY
 No account, no server and no tracking. Everything stays in your browser. An optional YouTube Data API key that you create yourself unlocks likes, subscribers and channel research.
 
@@ -67,7 +83,8 @@ TubeLens is an independent tool. It isn't affiliated with or endorsed by YouTube
 - **Language:** English.
 - **Store icon:** `icons/icon128.png`.
 - **Screenshots:** `store/assets/screenshot-1-clips.png` to `screenshot-4-thumbnails.png`
-  (1280×800).
+  (1280×800). The Academy screenshots in `src/academy/` can be recomposed at 1280×800 for a
+  fifth (planner) image.
 - **Small promo tile:** `store/assets/promo-small-440x280.png`.
 - **Homepage URL:** https://github.com/sharmaniraj009/tubelens
 - **Support URL:** https://github.com/sharmaniraj009/tubelens/issues
@@ -80,20 +97,21 @@ YouTube logos in the listing.
 
 **Single purpose:**
 
-> Help YouTube creators improve and reuse their videos: show a video's public stats and an SEO
-> checklist, find and save clip-worthy moments, suggest keywords, and make thumbnails.
+> Help YouTube creators improve, reuse and schedule their videos: show a video's public stats,
+> SEO and engagement checklists, find and save clip-worthy moments, plan uploads, suggest
+> keywords, and make thumbnails.
 
 **Permission justifications:**
 
 | Permission | Justification |
 |---|---|
-| `storage` | Saves the user's settings, optional API key, saved clips, tracked channels, drafts and thumbnail projects on their device. |
+| `storage` | Saves the user's settings, optional API key, saved clips, upload plan, tracked channels, drafts and thumbnail projects on their device. |
 | `unlimitedStorage` | Thumbnail projects contain full-size images that can exceed the default local storage quota. |
 | `clipboardWrite` | Copy buttons for tags, keyword ideas, clip links, chapters and the finished thumbnail image. |
 | `https://www.youtube.com/*` | The content script shows the TubeLens panel on video pages, and reads the video's public details and "Most replayed" data. |
 | `https://i.ytimg.com/*` | Loads a video's current thumbnail into the thumbnail maker. The canvas needs CORS access to the image. |
 | `https://suggestqueries.google.com/*` | Gets keyword ideas from YouTube search autocomplete. |
-| `https://www.googleapis.com/youtube/*` | Calls the YouTube Data API with the user's own key, for likes, comments, subscribers and channel research. |
+| `https://www.googleapis.com/youtube/*` | Calls the YouTube Data API with the user's own key, for likes, comments, subscribers, comments awaiting a reply, the upload strategy report and channel research. |
 
 **Remote code:** No, I am not using remote code. All JavaScript ships in the package.
 
@@ -164,5 +182,6 @@ Pushes that don't change the version run the tests only.
 
 ## Credits
 
-The screenshots use *Big Buck Bunny* © Blender Foundation, licensed under
-[CC BY 3.0](https://creativecommons.org/licenses/by/3.0/).
+The store screenshots use *Big Buck Bunny* © Blender Foundation, licensed under
+[CC BY 3.0](https://creativecommons.org/licenses/by/3.0/). The Academy screenshots use *Spring*
+by Blender Studio, licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).

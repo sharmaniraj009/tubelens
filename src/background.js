@@ -31,6 +31,23 @@ async function dataApiStats({ videoId, channelId }) {
   };
 }
 
+// The top 100 comments (1 unit), for the Engage tab's list of comments to answer.
+async function videoComments({ videoId }) {
+  const client = await apiClient();
+  if (!client) return { available: false };
+  try {
+    return { available: true, comments: await client.commentThreads({ videoId, max: 100, order: "relevance" }) };
+  } catch (err) {
+    if (err instanceof YouTubeApiError && err.code === "not_found") return { available: true, comments: [], note: err.message };
+    throw err;
+  }
+}
+
+async function openPage(path) {
+  await chrome.tabs.create({ url: chrome.runtime.getURL(path) });
+  return { opened: true };
+}
+
 // The thumbnail editor reads and removes this seed when it opens.
 async function openThumbnail({ image, title, videoId }) {
   await chrome.storage.session.set({ thumbnailSeed: { image, title, videoId } });
@@ -59,8 +76,11 @@ async function testKey({ key }) {
 const handlers = {
   keywordIdeas: ({ seed }) => keywordIdeas(String(seed ?? "")),
   dataApiStats,
+  videoComments,
   openThumbnail,
   openResearch,
+  openPlanner: () => openPage("src/planner.html"),
+  openAcademy: ({ lesson }) => openPage(`src/academy.html${/^[\w-]+$/.test(lesson ?? "") ? `#${lesson}` : ""}`),
   openOptions: async () => {
     await chrome.runtime.openOptionsPage();
     return { opened: true };

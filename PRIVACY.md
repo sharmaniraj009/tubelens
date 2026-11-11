@@ -1,6 +1,6 @@
 # TubeLens privacy policy
 
-Effective 5 November 2026. This policy covers the TubeLens Chrome extension and the TubeLens
+Effective 12 November 2026. This policy covers the TubeLens Chrome extension and the TubeLens
 MCP server.
 
 ## Summary
@@ -14,8 +14,9 @@ developer or anyone else.
 Everything TubeLens keeps stays on your device:
 
 - **Chrome extension:** stored in the extension's local storage (`chrome.storage`) in your
-  browser. This holds your YouTube Data API key (if you add one), saved clips, tracked
-  competitor channels, SEO-checker drafts, thumbnail projects, and panel preferences.
+  browser. This holds your YouTube Data API key (if you add one), saved clips, your upload
+  plan and strategy report, tracked competitor channels, SEO-checker drafts, thumbnail projects,
+  Academy progress, and panel preferences.
   Uninstalling the extension deletes it.
 - **MCP server:** stored in `~/.tubelens`, or in `$TUBELENS_HOME` if you set it, on your
   computer. This holds video stat snapshots, saved competitors and bookmarks.
@@ -32,10 +33,11 @@ provide the feature you're using:
 | `www.youtube.com` | The id of the video you're viewing | Read the video's public details and "Most replayed" data |
 | `i.ytimg.com` | A video id | Load a video's thumbnail into the thumbnail maker |
 | `suggestqueries.google.com` | The seed phrase you type | Get keyword ideas from YouTube search autocomplete |
-| `www.googleapis.com/youtube` | Video and channel ids, search terms, and your own API key | YouTube Data API features: likes, subscribers, channel research, comments |
+| `www.googleapis.com/youtube` | Video and channel ids, search terms, and your own API key | YouTube Data API features: likes, subscribers, channel research, the upload strategy report, comments to reply to |
 
 These requests are covered by the [Google Privacy Policy](https://policies.google.com/privacy).
-TubeLens doesn't send them anywhere else.
+TubeLens doesn't send them anywhere else. Exporting the upload plan to a calendar creates a
+file on your device; TubeLens doesn't send it anywhere.
 
 ## YouTube API Services
 
